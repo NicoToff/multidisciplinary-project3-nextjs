@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model employee {
+  id        Int    @id @default(autoincrement())
+  firstName String @db.VarChar(50)
+  lastName  String @db.VarChar(50)
+  item      item[]
+}
+
+model item {
+  id         Int       @id @default(autoincrement())
+  epc        String?   @db.VarChar(24)
+  name       String    @db.Text
+  timestamp  DateTime? @default(now()) @db.DateTime
+  employeeId Int
+  employee   employee  @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Item_Employee")
+
+  @@index([employeeId], map: "fk_Item_Employee_idx")
+}
