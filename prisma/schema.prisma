@@ -16,9 +16,9 @@ model employee {
 
 model item {
   id         Int       @id @default(autoincrement())
-  epc        String?   @db.VarChar(24)
+  epc        String    @unique(map: "epc_UNIQUE") @db.VarChar(24)
   name       String    @db.Text
-  timestamp  DateTime? @default(now()) @db.DateTime
+  timestamp  DateTime? @default(now()) @db.DateTime(0)
   employeeId Int
   employee   employee  @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Item_Employee")
 

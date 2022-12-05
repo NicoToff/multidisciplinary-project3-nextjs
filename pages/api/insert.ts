@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const { epc, firstName, lastName, itemName } = req.body as InsertReqData;
 
     if (!(isOk(firstName) && isOk(lastName) && isOk(itemName) && isOk(epc))) {
-        res.status(400).json({ name: "Bad Request" });
+        res.status(400).json({ message: "Bad Request" });
         return;
     }
 
@@ -31,6 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     console.log(employee);
 
     // Create a new item with itemName, or fetch the existing one
+    // TODO: Check if the item is already assigned to another employee
+
     let item = await prisma.item.findFirst({
         where: {
             name: itemName,
@@ -45,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 epc,
                 name: itemName,
                 employeeId: employee.id,
-                timestamp: new Date(),
+                // timestamp: new Date(), // TODO: Check if timestamp is needed
             },
         });
     } else {
@@ -58,14 +60,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 epc,
                 name: itemName,
                 employeeId: employee.id,
-                timestamp: new Date(),
+                // timestamp: new Date(), // TODO: Check if timestamp is needed
             },
         });
     }
 
     console.log(item);
 
-    res.status(200).json({ name: "John Doe" });
+    res.status(200).json({ message: "OK", item, employee });
 }
 
 function isOk(str: string | null) {

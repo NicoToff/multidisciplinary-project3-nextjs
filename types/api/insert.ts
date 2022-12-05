@@ -1,3 +1,5 @@
+import type { employee, item } from "@prisma/client";
+
 export type InsertReqData = {
     epc: string;
     firstName: string;
@@ -6,5 +8,7 @@ export type InsertReqData = {
 };
 
 export type InsertResData = {
-    name: string;
+    message: string;
+    employee?: employee;
+    item?: item;
 };
