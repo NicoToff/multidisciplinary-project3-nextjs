@@ -1,18 +1,12 @@
 // #region Imports
 import { useState, useEffect } from "react";
 import { connect, MqttClient } from "mqtt";
-import {
-    Container,
-    Typography,
-    Badge,
-    Button,
-    FormControl,
-    Input,
-    InputLabel,
-    FormHelperText,
-    Box,
-} from "@mui/material";
-import type { InsertReqData, InsertResData } from "../types/api/insert";
+
+import Container from "@mui/material/Container";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+
+import { PairingForm } from "../components/PairingForm";
 
 import { TransitionAlerts } from "../components/TransitionAlert";
 // #endregion
@@ -29,10 +23,6 @@ const TOPIC = "/helha/nicotoff/rfid";
 
 export default function Home() {
     const [epc, setEpc] = useState<Set<string>>(new Set());
-
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [itemName, setItemName] = useState("");
 
     useEffect(() => {
         const client: MqttClient = connect(mqttUri, options);
@@ -61,45 +51,7 @@ export default function Home() {
             <Typography variant="h3" component="h2" color="initial">
                 Pair tags
             </Typography>
-            <Box
-                component={"form"}
-                onSubmit={sendToBackEnd}
-                sx={{
-                    "& > :not(style)": { m: 1 },
-                }}
-            >
-                <FormControl>
-                    <InputLabel htmlFor="firstname">First name</InputLabel>
-                    <Input
-                        onChange={(e) => setFirstName(e.target.value)}
-                        id="firstname"
-                        required
-                        aria-describedby="first name field"
-                    />
-                </FormControl>
-                <FormControl>
-                    <InputLabel htmlFor="lastname">Last name</InputLabel>
-                    <Input
-                        onChange={(e) => setLastName(e.target.value)}
-                        id="lastname"
-                        required
-                        aria-describedby="last name field"
-                    />
-                </FormControl>
-                <FormControl>
-                    <InputLabel htmlFor="epc">Item name</InputLabel>
-                    <Input
-                        onChange={(e) => setItemName(e.target.value)}
-                        id="itemname"
-                        required
-                        aria-describedby="name of item to updload"
-                    />
-                    <FormHelperText id="itemname">{epc.values().next().value}</FormHelperText>
-                </FormControl>
-                <Button variant="outlined" color="success" type="submit">
-                    Send
-                </Button>
-            </Box>
+            <PairingForm epc={epc} setEpc={setEpc} />
             <Button
                 variant="outlined"
                 color="secondary"
@@ -122,27 +74,6 @@ export default function Home() {
             )}
         </Container>
     );
-
-    async function sendToBackEnd(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        const body: InsertReqData = {
-            epc: epc.values().next().value, // Takes the first value of the set
-            firstName,
-            lastName,
-            itemName,
-        };
-        const response = await fetch("/api/insert", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-        })
-            .then((res) => res.json() as Promise<InsertResData>)
-            .catch(() => "");
-        console.log(response);
-        setEpc(new Set());
-    }
 
     function resetRFID() {
         setEpc(new Set());
