@@ -9,6 +9,8 @@ import Button from "@mui/material/Button";
 import { PairingForm } from "../components/PairingForm";
 
 import { TransitionAlerts } from "../components/TransitionAlert";
+
+import type { FindEpcReqData, FindEpcResData } from "../types/api/findEpc";
 // #endregion
 
 /* Public MQTT */
@@ -30,9 +32,20 @@ export default function Home() {
             console.log(`Connected to ${mqttDomain}`);
         });
         client.subscribe(TOPIC);
-        client.on("message", (topic, message) => {
+        client.on("message", async (topic, message) => {
             const splitEpc = message.toString().split(";");
             setEpc((prev) => new Set([...Array.from(prev), ...splitEpc]));
+            const { message: res } = await fetch("/api/findEpc", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ epc: splitEpc } as FindEpcReqData),
+            })
+                .then((f) => f.json() as Promise<FindEpcResData>)
+                .catch(() => {
+                    return { message: "error" };
+                });
         });
 
         return () => {
@@ -51,6 +64,13 @@ export default function Home() {
             <Typography variant="h3" component="h2" color="initial">
                 Pair tags
             </Typography>
+            {epc.size > 1 && (
+                <TransitionAlerts color="warning" action={resetRFID}>
+                    {`WARNING: ${epc.size} RFID tags have been scanned.
+                    To pair an item with an employee, you might want to make sure only a single tag is scanned.
+                    Move away all unnecessary tags and click the RESET button.`}
+                </TransitionAlerts>
+            )}
             <PairingForm epc={epc} setEpc={setEpc} />
             <Button
                 variant="outlined"
@@ -65,13 +85,6 @@ export default function Home() {
             >
                 Get items
             </Button>
-            {epc.size > 1 && (
-                <TransitionAlerts color="warning" action={resetRFID}>
-                    {`WARNING: ${epc.size} RFID tags have been scanned.
-                    To pair an item with an employee, you might want to make sure only a single tag is scanned.
-                    Move away all unnecessary tags and click the RESET button.`}
-                </TransitionAlerts>
-            )}
         </Container>
     );
 

@@ -20,45 +20,50 @@ export function PairingForm({ epc, setEpc }: PairingFormProps) {
     const [itemName, setItemName] = useState("");
 
     return (
-        <Box
-            component={"form"}
-            onSubmit={sendToBackEnd}
-            sx={{
-                "& > :not(style)": { m: 1 },
-            }}
-        >
-            <FormControl>
-                <InputLabel htmlFor="firstname">First name</InputLabel>
-                <Input
-                    onChange={(e) => setFirstName(e.target.value)}
-                    id="firstname"
-                    required
-                    aria-describedby="first name field"
-                />
-            </FormControl>
-            <FormControl>
-                <InputLabel htmlFor="lastname">Last name</InputLabel>
-                <Input
-                    onChange={(e) => setLastName(e.target.value)}
-                    id="lastname"
-                    required
-                    aria-describedby="last name field"
-                />
-            </FormControl>
-            <FormControl>
-                <InputLabel htmlFor="epc">Item name</InputLabel>
-                <Input
-                    onChange={(e) => setItemName(e.target.value)}
-                    id="itemname"
-                    required
-                    aria-describedby="name of item to updload"
-                />
-                <FormHelperText id="itemname">{epc.values().next().value}</FormHelperText>
-            </FormControl>
-            <Button variant="outlined" color="success" type="submit">
-                Send
-            </Button>
-        </Box>
+        <>
+            {Array.from(epc).map((epc) => (
+                <Box
+                    key={epc}
+                    component={"form"}
+                    onSubmit={sendToBackEnd}
+                    sx={{
+                        "& > :not(style)": { m: 1 },
+                    }}
+                >
+                    <FormControl>
+                        <InputLabel htmlFor="firstname">First name</InputLabel>
+                        <Input
+                            onChange={(e) => setFirstName(e.target.value)}
+                            id="firstname"
+                            required
+                            aria-describedby="first name field"
+                        />
+                    </FormControl>
+                    <FormControl>
+                        <InputLabel htmlFor="lastname">Last name</InputLabel>
+                        <Input
+                            onChange={(e) => setLastName(e.target.value)}
+                            id="lastname"
+                            required
+                            aria-describedby="last name field"
+                        />
+                    </FormControl>
+                    <FormControl>
+                        <InputLabel htmlFor="epc">Item name</InputLabel>
+                        <Input
+                            onChange={(e) => setItemName(e.target.value)}
+                            id="itemname"
+                            required
+                            aria-describedby="name of item to updload"
+                        />
+                        <FormHelperText id="itemname">{epc}</FormHelperText>
+                    </FormControl>
+                    <Button variant="outlined" color="success" type="submit">
+                        Send
+                    </Button>
+                </Box>
+            ))}
+        </>
     );
 
     async function sendToBackEnd(e: React.FormEvent<HTMLFormElement>) {
