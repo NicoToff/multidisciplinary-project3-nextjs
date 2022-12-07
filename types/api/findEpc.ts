@@ -1,4 +1,5 @@
 import type { Employee, Item } from "@prisma/client";
+import type { ItemRecord } from "../itemRecord";
 
 export type FindEpcReqData = {
     epc: string[];
@@ -6,6 +7,5 @@ export type FindEpcReqData = {
 
 export type FindEpcResData = {
     message: string;
-    employee?: Employee;
-    item?: Item;
+    itemRecords?: ItemRecord[];
 };

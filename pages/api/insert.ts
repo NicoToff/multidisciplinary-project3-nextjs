@@ -6,10 +6,17 @@ import type { InsertReqData, InsertResData } from "../../types/api/insert";
 export default async function handler(req: NextApiRequest, res: NextApiResponse<InsertResData>) {
     const { epc, firstName, lastName, itemName } = req.body as InsertReqData;
 
+    console.log(`firstName: ${firstName}`);
+    console.log(`lastName: ${lastName}`);
+    console.log(`itemName: ${itemName}`);
+    console.log(`epc: ${epc}`);
+
     if (!(isOk(firstName) && isOk(lastName) && isOk(itemName) && isOk(epc))) {
         res.status(400).json({ message: "Bad Request" });
         return;
     }
+
+    res.status(200).json({ message: "OK" });
 
     let employee = await prisma.employee.findFirst({
         where: {
@@ -30,13 +37,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     console.log(employee);
 
+    // Find the RfidTag id in the database
+    const { id: rfidTagId } = (await prisma.rfidTag.findFirst({
+        where: {
+            epc,
+        },
+        select: {
+            id: true,
+        },
+    })) as { id: number };
+
     // Create a new item with itemName, or fetch the existing one
     // TODO: Check if the item is already assigned to another employee
 
     let item = await prisma.item.findFirst({
         where: {
-            name: itemName,
-            employeeId: employee.id,
+            rfidTagId,
         },
     });
 
@@ -44,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         console.log("Creating new item");
         item = await prisma.item.create({
             data: {
-                epc,
+                rfidTagId,
                 name: itemName,
                 employeeId: employee.id,
                 // timestamp: new Date(), // TODO: Check if timestamp is needed
@@ -57,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 id: item.id,
             },
             data: {
-                epc,
+                rfidTagId,
                 name: itemName,
                 employeeId: employee.id,
                 // timestamp: new Date(), // TODO: Check if timestamp is needed
@@ -67,7 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     console.log(item);
 
-    res.status(200).json({ message: "OK", item, employee });
+    // res.status(200).json({ message: "OK", item, employee });
 }
 
 function isOk(str: string | null) {

@@ -11,6 +11,7 @@ import { PairingForm } from "../components/PairingForm";
 import { TransitionAlerts } from "../components/TransitionAlert";
 
 import type { FindEpcReqData, FindEpcResData } from "../types/api/findEpc";
+import type { ItemRecord } from "../types/itemRecord";
 // #endregion
 
 /* Public MQTT */
@@ -24,7 +25,7 @@ const options = {
 const TOPIC = "/helha/nicotoff/rfid";
 
 export default function Home() {
-    const [epc, setEpc] = useState<Set<string>>(new Set());
+    const [receivedItemRecords, setReceivedItemRecords] = useState<ItemRecord[]>([]);
 
     useEffect(() => {
         const client: MqttClient = connect(mqttUri, options);
@@ -34,8 +35,7 @@ export default function Home() {
         client.subscribe(TOPIC);
         client.on("message", async (topic, message) => {
             const splitEpc = message.toString().split(";");
-            setEpc((prev) => new Set([...Array.from(prev), ...splitEpc]));
-            const { message: res } = await fetch("/api/findEpc", {
+            const { message: status, itemRecords } = await fetch("/api/findEpc", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -44,8 +44,17 @@ export default function Home() {
             })
                 .then((f) => f.json() as Promise<FindEpcResData>)
                 .catch(() => {
-                    return { message: "error" };
+                    return { message: "error", itemRecords: undefined };
                 });
+            console.log(itemRecords);
+            if (status === "OK" && itemRecords) {
+                // Check for duplicates
+                const newRecords = itemRecords.filter(
+                    (itemRecord) =>
+                        !receivedItemRecords.some((receivedItemRecord) => receivedItemRecord.epc === itemRecord.epc)
+                );
+                setReceivedItemRecords((prev) => [...prev, ...newRecords]);
+            }
         });
 
         return () => {
@@ -54,41 +63,30 @@ export default function Home() {
                 client.end(true);
             }
         };
-    }, [epc]);
+    }, [receivedItemRecords]);
 
     return (
         <Container>
-            <Typography variant="h2" component="h1" color="initial">
+            <Typography variant="h2" component="h1">
                 MQTT
             </Typography>
-            <Typography variant="h3" component="h2" color="initial">
+            <Typography variant="h3" component="h2">
                 Pair tags
             </Typography>
-            {epc.size > 1 && (
+            {receivedItemRecords.length > 1 && (
                 <TransitionAlerts color="warning" action={resetRFID}>
-                    {`WARNING: ${epc.size} RFID tags have been scanned.
+                    {`WARNING: ${receivedItemRecords.length} RFID tags have been scanned.
                     To pair an item with an employee, you might want to make sure only a single tag is scanned.
                     Move away all unnecessary tags and click the RESET button.`}
                 </TransitionAlerts>
             )}
-            <PairingForm epc={epc} setEpc={setEpc} />
-            <Button
-                variant="outlined"
-                color="secondary"
-                onClick={async () =>
-                    console.log(
-                        await fetch("/api/find")
-                            .then((f) => f.json())
-                            .catch(() => "")
-                    )
-                }
-            >
-                Get items
-            </Button>
+            {receivedItemRecords.map((itemRecord) => (
+                <PairingForm itemRecord={itemRecord} key={itemRecord.epc} />
+            ))}
         </Container>
     );
 
     function resetRFID() {
-        setEpc(new Set());
+        setReceivedItemRecords([]);
     }
 }
