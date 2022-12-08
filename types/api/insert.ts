@@ -1,4 +1,4 @@
-import type { employee, item } from "@prisma/client";
+import type { Employee, Item } from "@prisma/client";
 
 export type InsertReqData = {
     epc: string;
@@ -9,6 +9,6 @@ export type InsertReqData = {
 
 export type InsertResData = {
     message: string;
-    employee?: employee;
-    item?: item;
+    employee?: Employee;
+    item?: Item;
 };
