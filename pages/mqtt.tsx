@@ -16,7 +16,7 @@ import type { ItemRecord } from "../types/itemRecord";
 
 /* Public MQTT */
 const mqttDomain = "test.mosquitto.org";
-const port = 8081;
+const port = 8091;
 const mqttUri = `mqtt://${mqttDomain}`;
 const options = {
     port,
