@@ -1,6 +1,7 @@
 // #region Imports
 import { useState, useEffect } from "react";
 import { connect, MqttClient } from "mqtt";
+import WebSocket from "ws";
 
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -21,6 +22,7 @@ const mqttUri = `mqtt://${mqttDomain}`;
 const options = {
     port,
     keepalive: 60,
+    transport: "websocket",
 };
 const TOPIC = "/helha/nicotoff/rfid";
 
