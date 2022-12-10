@@ -17,12 +17,11 @@ import type { ItemRecord } from "../types/itemRecord";
 
 /* Public MQTT */
 const mqttDomain = "test.mosquitto.org";
-const port = 8091;
+const port = 8081;
 const mqttUri = `mqtt://${mqttDomain}`;
 const options = {
     port,
     keepalive: 60,
-    transport: "websocket",
 };
 const TOPIC = "/helha/nicotoff/rfid";
 
