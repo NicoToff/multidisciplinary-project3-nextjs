@@ -1,7 +1,6 @@
 // #region Imports
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { connect, MqttClient } from "mqtt";
-import WebSocket from "ws";
 
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -27,44 +26,50 @@ const TOPIC = "/helha/nicotoff/rfid";
 
 export default function Home() {
     const [receivedItemRecords, setReceivedItemRecords] = useState<ItemRecord[]>([]);
+    const client = useRef<MqttClient>();
+    const watcher = useRef(false);
 
     useEffect(() => {
-        const client: MqttClient = connect(mqttUri, options);
-        client.on("connect", () => {
+        client.current = connect(mqttUri, options);
+        client.current.on("connect", () => {
             console.log(`Connected to ${mqttDomain}`);
         });
-        client.subscribe(TOPIC);
-        client.on("message", async (topic, message) => {
-            const splitEpc = message.toString().split(";");
-            const { message: status, itemRecords } = await fetch("/api/findEpc", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ epc: splitEpc } as FindEpcReqData),
-            })
-                .then((f) => f.json() as Promise<FindEpcResData>)
-                .catch(() => {
-                    return { message: "error", itemRecords: undefined };
-                });
-            console.log(itemRecords);
-            if (status === "OK" && itemRecords) {
-                // Check for duplicates
-                const newRecords = itemRecords.filter(
-                    (itemRecord) =>
-                        !receivedItemRecords.some((receivedItemRecord) => receivedItemRecord.epc === itemRecord.epc)
-                );
-                setReceivedItemRecords((prev) => [...prev, ...newRecords]);
-            }
-        });
+    }, []);
+
+    useEffect(() => {
+        if (client.current) {
+            client.current.subscribe(TOPIC);
+
+            client.current.on("message", async (topic, message) => {
+                const splitEpc = message.toString().split(";");
+                const { message: status, itemRecords } = await fetch("/api/findEpc", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ epc: splitEpc } as FindEpcReqData),
+                })
+                    .then((f) => f.json() as Promise<FindEpcResData>)
+                    .catch(() => {
+                        return { message: "error", itemRecords: undefined };
+                    });
+                if (status === "OK" && itemRecords) {
+                    const newRecords = itemRecords.filter(
+                        (itemRecord) =>
+                            !receivedItemRecords.some((receivedItemRecord) => receivedItemRecord.epc === itemRecord.epc)
+                    );
+                    setReceivedItemRecords((prev) => [...prev, ...newRecords]);
+                }
+            });
+        }
 
         return () => {
-            if (client) {
-                client.unsubscribe(TOPIC);
-                client.end(true);
+            if (client.current) {
+                client.current.removeAllListeners();
+                client.current.unsubscribe(TOPIC);
             }
         };
-    }, [receivedItemRecords]);
+    }, [client, receivedItemRecords]);
 
     return (
         <Container>
