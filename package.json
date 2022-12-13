@@ -1,0 +1,16 @@
+{
+    "name": "rest-api",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "dev": "nodemon ./bin/www -e js,json"
+    },
+    "dependencies": {
+        "cookie-parser": "~1.4.6",
+        "debug": "~4.3.4",
+        "express": "~4.18.2",
+        "http-errors": "~1.6.3",
+        "morgan": "~1.10.0",
+        "mqtt": "^4.3.7"
+    }
+}
