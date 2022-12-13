@@ -34,9 +34,8 @@ mqtt.on("message", (topic, message) => {
 router.get("/", function (req, res, next) {
     // Make a JSON array from the map
     const json = jsonify(map);
-    console.log(json);
-
-    res.json(json);
+    res.set("Access-Control-Allow-Origin", "*"); // Sets Access-Control-Allow-Origin response header
+    res.status(200).json(json);
 });
 
 function jsonify(map) {
