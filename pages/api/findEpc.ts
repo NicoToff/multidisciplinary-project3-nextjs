@@ -6,51 +6,39 @@ import { RfidTag } from "@prisma/client";
 import type { FindEpcReqData, FindEpcResData } from "../../types/api/findEpc";
 import type { ItemRecord } from "../../types/itemRecord";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<FindEpcResData>) {
+export default async function findEpc(req: NextApiRequest, res: NextApiResponse<FindEpcResData>) {
     const { epc } = req.body as FindEpcReqData;
-    const itemRecords: ItemRecord[] = [];
 
     if (!epc) {
-        res.status(204).json({ message: "No Content", itemRecords });
+        res.status(204).json({ message: "No Content", itemRecords: undefined });
         return;
     }
 
-    console.log(`Received ${epc.length} epc(s).`);
-
     // Add the epc to the database if it doesn't exist
     const promises = epc.map((epc) => {
-        itemRecords.push({ epc });
         return prisma.rfidTag.upsert({
             where: {
                 epc,
             },
-            update: {}, // We only update the timestamp (automatically)
+            update: { lastScanned: new Date() },
             create: {
                 epc,
             },
         });
     });
 
-    const rfidTagsInDB: RfidTag[] = await Promise.all(promises);
+    const scannedRfidTags: RfidTag[] = await Promise.all(promises);
 
+    // Find all the items that are associated to the rfid tags
     const items = await prisma.item.findMany({
         where: {
             rfidTagId: {
-                in: rfidTagsInDB.map((rfidTag) => rfidTag.id),
+                in: scannedRfidTags.map((tag) => tag.id),
             },
         },
     });
 
-    // Add the item.name to the appropriate itemRecord, find it thanks to id found in rfidTagsInDB
-    items.forEach((item) => {
-        const itemRecord = itemRecords.find(
-            (itemRecord) => itemRecord.epc === rfidTagsInDB.find((rfidTag) => rfidTag.id === item.rfidTagId)?.epc
-        );
-        if (itemRecord) {
-            itemRecord.itemName = item.name;
-        }
-    });
-
+    // Find all employees whose id appear in "items" in their employeeId field
     const employees = await prisma.employee.findMany({
         where: {
             id: {
@@ -59,20 +47,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         },
     });
 
-    // Add the employee.firstName and employee.lastName to the appropriate itemRecord, find it thanks to id found in items
-    employees.forEach((employee) => {
-        const itemRecord = itemRecords.find(
-            (itemRecord) =>
-                itemRecord.epc ===
-                rfidTagsInDB.find(
-                    (rfidTag) => rfidTag.id === items.find((item) => item.employeeId === employee.id)?.rfidTagId
-                )?.epc
-        );
-        if (itemRecord) {
-            itemRecord.firstName = employee.firstName;
-            itemRecord.lastName = employee.lastName;
-        }
+    const itemsWithInfo: ItemRecord[] = items.map((item) => {
+        const relatedEmployee = employees.find((employee) => employee.id === item.employeeId);
+        return {
+            epc: scannedRfidTags.find((rfidTag) => rfidTag.id === item.rfidTagId)?.epc || "Unknown",
+            itemName: item.name,
+            firstName: relatedEmployee?.firstName || "Unknown",
+            lastName: relatedEmployee?.lastName || "Unknown",
+        };
     });
 
-    res.status(200).json({ message: "OK", itemRecords });
+    const completeItemRecords: ItemRecord[] = [
+        ...itemsWithInfo,
+        ...scannedRfidTags.filter((rfidTag) => {
+            return !items.find((item) => item.rfidTagId === rfidTag.id);
+        }),
+    ];
+
+    res.status(200).json({ message: "OK", itemRecords: completeItemRecords });
 }
