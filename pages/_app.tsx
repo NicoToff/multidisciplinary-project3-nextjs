@@ -101,6 +101,9 @@ export default function App({ Component, pageProps }: AppProps) {
         [mode]
     );
 
+    const size = 30;
+    const toggleIconSize = { width: size, height: size };
+
     return (
         <ColorModeContext.Provider value={colorMode}>
             <ThemeProvider theme={theme}>
@@ -134,10 +137,13 @@ export default function App({ Component, pageProps }: AppProps) {
                             >
                                 Dashboard
                             </Typography>
-                            <IconButton color="inherit">
-                                <Badge badgeContent={4} color="secondary">
-                                    <NotificationsIcon />
-                                </Badge>
+
+                            <IconButton size="large" onClick={colorMode.toggleColorMode} color="inherit">
+                                {theme.palette.mode === "dark" ? (
+                                    <LightMode sx={toggleIconSize} />
+                                ) : (
+                                    <DarkMode sx={toggleIconSize} />
+                                )}
                             </IconButton>
                         </Toolbar>
                     </AppBar>
@@ -158,23 +164,6 @@ export default function App({ Component, pageProps }: AppProps) {
                         <List component="nav">
                             {mainListItems}
                             <Divider sx={{ my: 1 }} />
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    width: "100%",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    bgcolor: "background.default",
-                                    color: "text.primary",
-                                    borderRadius: 1,
-                                    p: 3,
-                                }}
-                            >
-                                {theme.palette.mode} {`mode`}
-                                <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
-                                    {theme.palette.mode === "dark" ? <LightMode /> : <DarkMode />}
-                                </IconButton>
-                            </Box>
                             {/* {secondaryListItems} */}
                         </List>
                     </Drawer>
