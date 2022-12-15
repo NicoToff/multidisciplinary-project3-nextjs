@@ -59,9 +59,11 @@ export default async function findEpc(req: NextApiRequest, res: NextApiResponse<
 
     const completeItemRecords: ItemRecord[] = [
         ...itemsWithInfo,
-        ...scannedRfidTags.filter((rfidTag) => {
-            return !items.find((item) => item.rfidTagId === rfidTag.id);
-        }),
+        ...scannedRfidTags
+            .filter((rfidTag) => {
+                return !items.find((item) => item.rfidTagId === rfidTag.id);
+            })
+            .map((rfidTag) => ({ epc: rfidTag.epc } as ItemRecord)),
     ];
 
     console.log(completeItemRecords);

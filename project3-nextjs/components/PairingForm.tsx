@@ -99,8 +99,8 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
             },
             body: JSON.stringify(body),
         })
-            .then((res) => res.json() as Promise<InsertResData>)
-            .catch(() => ({ message: "Error" } as InsertResData));
+            .then((res) => res.json() satisfies Promise<InsertResData>)
+            .catch(() => ({ message: "Error" } satisfies InsertResData));
         if (response.message !== "Error" && response.message !== "Bad Request") {
             setSentStatus("Sent");
         } else {

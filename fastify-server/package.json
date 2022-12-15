@@ -22,6 +22,7 @@
         "fastify": "^4.0.0",
         "fastify-cli": "^5.7.0",
         "fastify-plugin": "^4.0.0",
+        "mqtt": "^4.3.7",
         "prisma": "^4.7.1"
     },
     "devDependencies": {

@@ -61,7 +61,7 @@ export default function Mqtt() {
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ epc: validEpcs } as FindEpcReqData),
+                        body: JSON.stringify({ epc: validEpcs } satisfies FindEpcReqData),
                     })
                         .then((f) => f.json() as Promise<FindEpcResData>)
                         .catch(() => {
