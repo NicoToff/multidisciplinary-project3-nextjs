@@ -9,19 +9,20 @@ type TransitionAlertsProps = {
     children: React.ReactNode;
     action: () => void;
     color?: AlertProps["color"];
+    sx?: AlertProps["sx"];
 };
 
-export function TransitionAlerts({ children, action, color }: TransitionAlertsProps) {
+export function TransitionAlerts({ children, action, color, sx }: TransitionAlertsProps) {
     return (
         <Box sx={{ width: "100%" }}>
             <Alert
-                color={color ?? "success"}
+                severity={color ?? "success"}
                 action={
                     <Button aria-label="action" color="inherit" size="small" onClick={action}>
                         RESET
                     </Button>
                 }
-                sx={{ mb: 2 }}
+                sx={sx ?? {}}
             >
                 {children}
             </Alert>
