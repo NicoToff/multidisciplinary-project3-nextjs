@@ -8,7 +8,7 @@ export type InsertReqData = {
 };
 
 export type InsertResData = {
-    message: string;
+    message: "OK" | "Error" | "Bad Request";
     employee?: Employee;
     item?: Item;
 };

@@ -16,8 +16,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         return;
     }
 
-    res.status(200).json({ message: "OK" });
-
     let employee = await prisma.employee.findFirst({
         where: {
             firstName,
@@ -83,7 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     console.log(item);
 
-    // res.status(200).json({ message: "OK", item, employee });
+    res.status(200).json({ message: "OK", item, employee });
 }
 
 function isOk(str: string | null) {

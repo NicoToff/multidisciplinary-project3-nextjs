@@ -9,6 +9,7 @@ import Button from "@mui/material/Button";
 
 import SendIcon from "@mui/icons-material/Send";
 import DoneIcon from "@mui/icons-material/Done";
+import ErrorIcon from "@mui/icons-material/Error";
 
 import type { InsertReqData, InsertResData } from "../types/api/insert";
 import type { ItemRecord } from "../types/itemRecord";
@@ -23,7 +24,7 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
     const [firstName, setFirstName] = useState(fname ?? "");
     const [lastName, setLastName] = useState(lname ?? "");
     const [itemName, setItemName] = useState(iname ?? "");
-    const [sent, setSent] = useState(false);
+    const [sentStatus, setSentStatus] = useState<"Unsent" | "Sent" | "Error">("Unsent");
 
     return (
         <Box
@@ -67,12 +68,18 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
             </FormControl>
             <Button
                 variant="outlined"
-                color={fname || lname || iname ? "warning" : "success"}
+                color={fname || lname || iname ? "warning" : sentStatus === "Error" ? "error" : "success"}
                 type="submit"
-                disabled={sent}
-                endIcon={sent ? <DoneIcon /> : <SendIcon />}
+                disabled={sentStatus === "Sent"}
+                endIcon={sentStatus === "Sent" ? <DoneIcon /> : sentStatus === "Unsent" ? <SendIcon /> : <ErrorIcon />}
             >
-                {sent ? "Sent" : fname || lname || iname ? "Update" : "Send"}
+                {sentStatus === "Sent"
+                    ? "Sent"
+                    : fname || lname || iname
+                    ? "Update"
+                    : sentStatus === "Error"
+                    ? "Error"
+                    : "Send"}
             </Button>
         </Box>
     );
@@ -93,10 +100,11 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
             body: JSON.stringify(body),
         })
             .then((res) => res.json() as Promise<InsertResData>)
-            .catch(() => "error");
-        if (response !== "error") {
-            setSent(true);
+            .catch(() => ({ message: "Error" } as InsertResData));
+        if (response.message !== "Error" && response.message !== "Bad Request") {
+            setSentStatus("Sent");
+        } else {
+            setSentStatus("Error");
         }
-        console.log(response);
     }
 }
