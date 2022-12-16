@@ -3,7 +3,7 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
-import { createContext, useState, useMemo } from "react";
+import { createContext, useState, useMemo, useEffect } from "react";
 import { styled, createTheme, ThemeProvider, useTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import MuiDrawer from "@mui/material/Drawer";
@@ -82,10 +82,21 @@ export default function App({ Component, pageProps }: AppProps) {
     };
 
     const [mode, setMode] = useState<"light" | "dark">("light");
+    useEffect(() => {
+        const storedTheme = localStorage.getItem("userStoredTheme") as "light" | "dark";
+        if (storedTheme) {
+            setMode(storedTheme);
+        }
+    }, []);
+
     const colorMode = useMemo(
         () => ({
             toggleColorMode: () => {
-                setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+                setMode((prevMode) => {
+                    const newMode = prevMode === "light" ? "dark" : "light";
+                    localStorage.setItem("userStoredTheme", newMode);
+                    return newMode;
+                });
             },
         }),
         []
