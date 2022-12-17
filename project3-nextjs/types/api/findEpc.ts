@@ -1,11 +1,11 @@
-import type { Employee, Item } from "@prisma/client";
 import type { ItemRecord } from "../itemRecord";
+import type { HTTP_Message } from "./_apiTypes";
 
 export type FindEpcReqData = {
     epc: string[];
 };
 
 export type FindEpcResData = {
-    message: string;
+    message: HTTP_Message;
     itemRecords?: ItemRecord[];
 };

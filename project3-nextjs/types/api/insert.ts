@@ -1,4 +1,5 @@
 import type { Employee, Item } from "@prisma/client";
+import type { HTTP_Message } from "./_apiTypes";
 
 export type InsertReqData = {
     epc: string;
@@ -8,7 +9,7 @@ export type InsertReqData = {
 };
 
 export type InsertResData = {
-    message: "OK" | "Error" | "Bad Request";
+    message: HTTP_Message;
     employee?: Employee;
     item?: Item;
 };
