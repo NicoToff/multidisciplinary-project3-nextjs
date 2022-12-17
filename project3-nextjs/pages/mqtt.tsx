@@ -16,6 +16,7 @@ import type { FindEpcReqData, FindEpcResData } from "../types/api/findEpc";
 import type { ItemRecord } from "../types/itemRecord";
 
 import { Time } from "../components/Time";
+import { SetTitle } from "../components/SetTitle";
 // #endregion
 
 /* Public MQTT */
@@ -39,8 +40,8 @@ export default function Mqtt() {
     const client = useRef<MqttClient>();
 
     useEffect(() => {
-        const mainTitle = document.getElementById("main-title");
-        mainTitle!.innerText = "Pair RFID Tags";
+        // const mainTitle = document.getElementById("main-title");
+        // mainTitle!.innerText = "Pair RFID Tags";
         client.current = connect(mqttUri, options);
         client.current.on("connect", () => {
             setMqttConnected(true);
@@ -90,6 +91,7 @@ export default function Mqtt() {
 
     return (
         <>
+            <SetTitle mainTitle="Pair RFID Tags" />
             <Grid container sx={{ justifyContent: "space-between" }}>
                 <Typography variant="h3" component="h2">
                     Pair tags
