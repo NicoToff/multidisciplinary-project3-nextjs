@@ -5,6 +5,8 @@ import type { InsertReqData, InsertResData } from "../../types/api/insert";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<InsertResData>) {
     const { epc, firstName, lastName, itemName } = req.body as InsertReqData;
+    const mandatoryString = validateAndFixMandatory((req.body as InsertReqData).mandatory);
+    const mandatory = parseInt(mandatoryString);
 
     console.log(`firstName: ${firstName}`);
     console.log(`lastName: ${lastName}`);
@@ -61,6 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 rfidTagId,
                 name: itemName,
                 employeeId: employee.id,
+                mandatory,
                 // timestamp: new Date(), // TODO: Check if timestamp is needed
             },
         });
@@ -86,4 +89,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
 function isOk(str: string | null) {
     return str ? str.trim() !== "" : false;
+}
+
+function validateAndFixMandatory(num: string | undefined) {
+    return num && (num === "0" || num === "1") ? num : "0";
 }

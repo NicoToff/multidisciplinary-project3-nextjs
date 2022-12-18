@@ -6,6 +6,8 @@ import InputLabel from "@mui/material/InputLabel";
 import FormHelperText from "@mui/material/FormHelperText";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import FormLabel from "@mui/material/FormLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 import SendIcon from "@mui/icons-material/Send";
 import DoneIcon from "@mui/icons-material/Done";
@@ -24,6 +26,8 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
     const [firstName, setFirstName] = useState(fname ?? "");
     const [lastName, setLastName] = useState(lname ?? "");
     const [itemName, setItemName] = useState(iname ?? "");
+    const [mandatoryChecked, setMandatoryChecked] = useState(true);
+
     const [sentStatus, setSentStatus] = useState<"Unsent" | "Sent" | "Error">("Unsent");
 
     return (
@@ -66,6 +70,14 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
                 />
                 <FormHelperText id="itemname">{epc}</FormHelperText>
             </FormControl>
+            <FormLabel>
+                Mandatory?
+                <Checkbox
+                    checked={mandatoryChecked}
+                    onChange={(e) => setMandatoryChecked(e.target.checked)}
+                    inputProps={{ "aria-label": "controlled" }}
+                />
+            </FormLabel>
             <Button
                 variant="outlined"
                 color={fname || lname || iname ? "warning" : sentStatus === "Error" ? "error" : "success"}
@@ -91,6 +103,7 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
             firstName,
             lastName,
             itemName,
+            mandatory: mandatoryChecked ? "1" : "0",
         };
         const response = await fetch("/api/insert", {
             method: "POST",
@@ -99,8 +112,8 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
             },
             body: JSON.stringify(body),
         })
-            .then((res) => res.json() satisfies Promise<InsertResData>)
-            .catch(() => ({ message: "Error" } satisfies InsertResData));
+            .then((res) => res.json() as Promise<InsertResData>)
+            .catch(() => ({ message: "Error" } as InsertResData));
         if (response.message !== "Error" && response.message !== "Bad Request") {
             setSentStatus("Sent");
         } else {

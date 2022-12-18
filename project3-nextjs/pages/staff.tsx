@@ -8,6 +8,15 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemText from "@mui/material/ListItemText";
+import Avatar from "@mui/material/Avatar";
+import FolderIcon from "@mui/icons-material/Folder";
+import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 type EmployeeWithItems = {
     employee: Employee;
     items: Item[];
@@ -62,11 +71,33 @@ export default function Staff({ employeesWithItems }: StaffPageProps) {
                                 {`, `}
                                 {employeeWithItems.employee.firstName} {`(${employeeWithItems.items.length} items)`}
                             </Typography>
-                            {employeeWithItems.items.map((item) => (
-                                <Button key={item.id} variant="outlined" sx={{ m: 0.5 }}>
-                                    {item.name}
-                                </Button>
-                            ))}
+                            <List>
+                                {employeeWithItems.items.map((item) => (
+                                    <ListItem
+                                        key={item.id}
+                                        secondaryAction={
+                                            <IconButton
+                                                edge="end"
+                                                onClick={() => deleteItem(item.id)}
+                                                aria-label="delete"
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        }
+                                    >
+                                        <ListItemAvatar>
+                                            <Avatar>
+                                                <FolderIcon />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={item.name}
+                                            secondary={item.mandatory ? "Mandatory" : null}
+                                            secondaryTypographyProps={{ color: "error" }}
+                                        />
+                                    </ListItem>
+                                ))}
+                            </List>
                             {/* TODO: Improve this with : https://mui.com/material-ui/react-list/#interactive */}
                             {employeeWithItems.items.length === 0 && (
                                 <Button
@@ -98,4 +129,20 @@ export default function Staff({ employeesWithItems }: StaffPageProps) {
             </Grid>
         </>
     );
+}
+
+function deleteItem(itemId: number) {
+    fetch("/api/deleteItem", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ itemId }),
+    })
+        .then(() => {
+            window.location.reload();
+        })
+        .catch((err) => {
+            console.error(err);
+        });
 }

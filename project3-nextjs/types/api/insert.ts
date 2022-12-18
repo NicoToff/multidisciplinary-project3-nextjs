@@ -6,6 +6,7 @@ export type InsertReqData = {
     firstName: string;
     lastName: string;
     itemName: string;
+    mandatory?: "0" | "1";
 };
 
 export type InsertResData = {
