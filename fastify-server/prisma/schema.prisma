@@ -15,12 +15,14 @@ model Employee {
 }
 
 model Item {
-  id          Int       @id @default(autoincrement())
-  name        String    @db.Text
-  employeeId  Int
-  rfidTagId   Int
-  lastChanged DateTime? @default(now()) @db.DateTime(0)
-  Employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Item_Employee")
+  id         Int       @id @default(autoincrement())
+  name       String    @db.Text
+  mandatory  Int?      @default(0) @db.TinyInt
+  timestamp  DateTime? @default(now()) @db.DateTime(0)
+  employeeId Int
+  rfidTagId  Int
+  Employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Item_Employee")
+  RfidTag    RfidTag   @relation(fields: [rfidTagId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Item_RfidTag1")
 
   @@index([employeeId], map: "fk_Item_Employee_idx")
   @@index([rfidTagId], map: "fk_Item_RfidTag1_idx")
@@ -30,4 +32,5 @@ model RfidTag {
   id          Int       @id @default(autoincrement())
   epc         String    @unique(map: "epc_UNIQUE") @db.VarChar(24)
   lastScanned DateTime? @default(now()) @db.DateTime(0)
+  Item        Item[]
 }
