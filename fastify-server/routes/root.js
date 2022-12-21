@@ -1,8 +1,15 @@
 "use strict";
-const prisma = require("../prisma/prisma.js");
-const mqtt = require("mqtt").connect("mqtt://test.mosquitto.org:1883");
-const findEpc = require("../utils/findEpc.js");
-const RECEIVE_EPC_TOPIC = "/helha/nicotoff/esp32/rfid";
+import prisma from "../prisma/prisma.js";
+import { connect } from "mqtt";
+
+const mqtt = connect(`mqtt://${process.env.NEXT_PUBLIC_MICHAUX_MQTT}`, {
+    username: process.env.NEXT_PUBLIC_MICHAUX_MQTT_USERNAME,
+    password: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PASSWORD,
+    port: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PORT,
+});
+import findEpc from "../utils/findEpc.js";
+
+const RECEIVE_EPC_TOPIC = process.env.RECEIVE_EPC_TOPIC;
 
 mqtt.on("connect", () => console.log("Fastify is connected to MQTT broker"));
 mqtt.subscribe(RECEIVE_EPC_TOPIC);
@@ -16,13 +23,13 @@ mqtt.on("message", async (topic, message) => {
     }
 });
 
-module.exports = async function (fastify, opts) {
+export default async function (fastify, opts) {
     fastify.get("/", async function (request, reply) {
         const employees = await prisma.employee.findMany();
         console.log(employees);
         return employees;
     });
-};
+}
 
 function validateEpc(epc) {
     return epc.length === 24;

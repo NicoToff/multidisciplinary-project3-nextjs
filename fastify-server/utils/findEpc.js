@@ -1,6 +1,6 @@
-const prisma = require("../prisma/prisma.js");
+import prisma from "../prisma/prisma.js";
 
-module.exports = async function findEpc(epc) {
+export default async function findEpc(epc) {
     // Add the epc to the database if it doesn't exist
     const promises = epc.map(epc => {
         return prisma.rfidTag.upsert({
@@ -58,4 +58,4 @@ module.exports = async function findEpc(epc) {
     console.log("🚀 ~ file: findEpc.js:57 ~ findEpc ~ completeItemRecords", completeItemRecords);
 
     return completeItemRecords;
-};
+}
