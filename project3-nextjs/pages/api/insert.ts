@@ -64,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 name: itemName,
                 employeeId: employee.id,
                 mandatory,
-                // timestamp: new Date(), // TODO: Check if timestamp is needed
+                timestamp: new Date(),
             },
         });
     } else {
@@ -77,7 +77,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 rfidTagId,
                 name: itemName,
                 employeeId: employee.id,
-                // timestamp: new Date(), // TODO: Check if timestamp is needed
+                mandatory,
+                timestamp: new Date(),
             },
         });
     }
@@ -88,7 +89,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 }
 
 function isOk(str: string | null) {
-    return str ? str.trim() !== "" : false;
+    // This tests for alphanumeric characters, spaces, and the following special characters: _+-
+    return str ? /^[a-zA-Z0-9 _+-]+$/.test(str) : false;
 }
 
 function validateAndFixMandatory(num: string | undefined) {

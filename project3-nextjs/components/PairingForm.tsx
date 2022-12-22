@@ -45,6 +45,7 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     id="firstname"
+                    inputProps={{ pattern: "/^[a-zA-Z0-9 _+-]+$/" }}
                     required
                     aria-describedby="first name field"
                 />
@@ -55,6 +56,7 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     id="lastname"
+                    inputProps={{ pattern: "/^[a-zA-Z0-9 _+-]+$/" }}
                     required
                     aria-describedby="last name field"
                 />
@@ -65,6 +67,7 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value)}
                     id="itemname"
+                    inputProps={{ pattern: "/^[a-zA-Z0-9 _+-]+$/" }}
                     required
                     aria-describedby="name of item to updload"
                 />
