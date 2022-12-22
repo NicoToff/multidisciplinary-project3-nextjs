@@ -77,6 +77,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" 
 const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
 import type { AppProps } from "next/app";
+import Head from "next/head";
 
 export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
     const [open, setOpen] = useState(true);
@@ -119,98 +120,106 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
     const toggleIconSize = { width: size, height: size };
 
     return (
-        <SessionProvider session={session}>
-            <ColorModeContext.Provider value={colorMode}>
-                <ThemeProvider theme={theme}>
-                    <Box sx={{ display: "flex" }}>
-                        <CssBaseline />
-                        <AppBar position="absolute" open={open}>
-                            <Toolbar
-                                sx={{
-                                    pr: "24px", // keep right padding when drawer closed
-                                }}
-                            >
-                                <IconButton
-                                    edge="start"
-                                    color="inherit"
-                                    aria-label="open drawer"
-                                    onClick={toggleDrawer}
+        <>
+            <Head>
+                <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+                <link rel="icon" type="image/png" href="/nt-32.png" />
+            </Head>
+            <SessionProvider session={session}>
+                <ColorModeContext.Provider value={colorMode}>
+                    <ThemeProvider theme={theme}>
+                        <Box sx={{ display: "flex" }}>
+                            <CssBaseline />
+                            <AppBar position="absolute" open={open}>
+                                <Toolbar
                                     sx={{
-                                        marginRight: "36px",
-                                        ...(open && { display: "none" }),
+                                        pr: "24px", // keep right padding when drawer closed
                                     }}
                                 >
-                                    <MenuIcon />
-                                </IconButton>
-                                <Typography
-                                    id="main-title"
-                                    component="h1"
-                                    variant="h6"
-                                    color="inherit"
-                                    noWrap
-                                    sx={{ flexGrow: 1 }}
-                                >
-                                    Dashboard
-                                </Typography>
+                                    <IconButton
+                                        edge="start"
+                                        color="inherit"
+                                        aria-label="open drawer"
+                                        onClick={toggleDrawer}
+                                        sx={{
+                                            marginRight: "36px",
+                                            ...(open && { display: "none" }),
+                                        }}
+                                    >
+                                        <MenuIcon />
+                                    </IconButton>
+                                    <Typography
+                                        id="main-title"
+                                        component="h1"
+                                        variant="h6"
+                                        color="inherit"
+                                        noWrap
+                                        sx={{ flexGrow: 1 }}
+                                    >
+                                        Dashboard
+                                    </Typography>
 
-                                <Button
-                                    onClick={() => {
-                                        signOut();
+                                    <Button
+                                        onClick={() => {
+                                            signOut();
+                                        }}
+                                        variant="outlined"
+                                    >
+                                        Sign Out
+                                    </Button>
+
+                                    <IconButton size="large" onClick={colorMode.toggleColorMode} color="inherit">
+                                        {theme.palette.mode === "dark" ? (
+                                            <LightMode sx={toggleIconSize} />
+                                        ) : (
+                                            <DarkMode sx={toggleIconSize} />
+                                        )}
+                                    </IconButton>
+                                </Toolbar>
+                            </AppBar>
+                            <Drawer variant="permanent" open={open}>
+                                <Toolbar
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "flex-end",
+                                        px: [1],
                                     }}
-                                    variant="outlined"
                                 >
-                                    Sign Out
-                                </Button>
-
-                                <IconButton size="large" onClick={colorMode.toggleColorMode} color="inherit">
-                                    {theme.palette.mode === "dark" ? (
-                                        <LightMode sx={toggleIconSize} />
-                                    ) : (
-                                        <DarkMode sx={toggleIconSize} />
-                                    )}
-                                </IconButton>
-                            </Toolbar>
-                        </AppBar>
-                        <Drawer variant="permanent" open={open}>
-                            <Toolbar
+                                    <IconButton onClick={toggleDrawer}>
+                                        <ChevronLeftIcon />
+                                    </IconButton>
+                                </Toolbar>
+                                <Divider />
+                                <List component="nav">
+                                    {mainListItems}
+                                    <Divider sx={{ my: 1 }} />
+                                    {/* {secondaryListItems} */}
+                                </List>
+                            </Drawer>
+                            <Box
+                                component="main"
                                 sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "flex-end",
-                                    px: [1],
+                                    backgroundColor: (theme) =>
+                                        theme.palette.mode === "light"
+                                            ? theme.palette.grey[100]
+                                            : theme.palette.grey[900],
+                                    flexGrow: 1,
+                                    height: "100vh",
+                                    overflow: "auto",
                                 }}
                             >
-                                <IconButton onClick={toggleDrawer}>
-                                    <ChevronLeftIcon />
-                                </IconButton>
-                            </Toolbar>
-                            <Divider />
-                            <List component="nav">
-                                {mainListItems}
-                                <Divider sx={{ my: 1 }} />
-                                {/* {secondaryListItems} */}
-                            </List>
-                        </Drawer>
-                        <Box
-                            component="main"
-                            sx={{
-                                backgroundColor: (theme) =>
-                                    theme.palette.mode === "light" ? theme.palette.grey[100] : theme.palette.grey[900],
-                                flexGrow: 1,
-                                height: "100vh",
-                                overflow: "auto",
-                            }}
-                        >
-                            <Toolbar />
-                            <Login>
-                                <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-                                    <Component {...pageProps} />
-                                </Container>
-                            </Login>
+                                <Toolbar />
+                                <Login>
+                                    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+                                        <Component {...pageProps} />
+                                    </Container>
+                                </Login>
+                            </Box>
                         </Box>
-                    </Box>
-                </ThemeProvider>
-            </ColorModeContext.Provider>
-        </SessionProvider>
+                    </ThemeProvider>
+                </ColorModeContext.Provider>
+            </SessionProvider>
+        </>
     );
 }

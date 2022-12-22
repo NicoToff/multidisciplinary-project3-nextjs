@@ -17,6 +17,7 @@ import { CenteredCircularProgress } from "../components/CenteredCircularProgress
 import type { FindEpcReqData, FindEpcResData } from "../types/api/findEpc";
 import type { ItemRecord } from "../types/itemRecord";
 import type { IClientOptions } from "mqtt";
+import Head from "next/head";
 
 /* Mr Michaux's MQTT */
 const mqttDomain = process.env.NEXT_PUBLIC_MICHAUX_MQTT;
@@ -77,6 +78,9 @@ export default function Mqtt() {
 
     return (
         <>
+            <Head>
+                <title>Pair Tags - Project 3</title>
+            </Head>
             <Grid container sx={{ justifyContent: "space-between" }}>
                 <Typography variant="h3" component="h2">
                     Pair tags

@@ -4,6 +4,7 @@ import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Deposits from "../components/Deposits";
 import Orders from "../components/Orders";
+import Head from "next/head";
 
 export default function Index() {
     useEffect(() => {
@@ -15,6 +16,9 @@ export default function Index() {
 
     return (
         <>
+            <Head>
+                <title>Dashboard - Project 3</title>
+            </Head>
             <Grid container spacing={3}>
                 {/* Recent Deposits */}
                 <Grid item xs={12} md={4} lg={3}>

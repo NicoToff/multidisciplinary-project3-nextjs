@@ -52,6 +52,7 @@ export default async function findEpc(req: NextApiRequest, res: NextApiResponse<
         return {
             epc: scannedRfidTags.find((rfidTag) => rfidTag.id === item.rfidTagId)?.epc || "Unknown",
             itemName: item.name,
+            mandatory: Boolean(item.mandatory),
             firstName: relatedEmployee?.firstName || "Unknown",
             lastName: relatedEmployee?.lastName || "Unknown",
         };
@@ -63,7 +64,7 @@ export default async function findEpc(req: NextApiRequest, res: NextApiResponse<
             .filter((rfidTag) => {
                 return !items.find((item) => item.rfidTagId === rfidTag.id);
             })
-            .map((rfidTag) => ({ epc: rfidTag.epc } as ItemRecord)),
+            .map((rfidTag) => ({ epc: rfidTag.epc } satisfies ItemRecord)),
     ];
 
     console.log(completeItemRecords);

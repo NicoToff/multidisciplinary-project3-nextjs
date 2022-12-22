@@ -16,6 +16,7 @@ import Avatar from "@mui/material/Avatar";
 import FolderIcon from "@mui/icons-material/Folder";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Head from "next/head";
 
 type EmployeeWithItems = {
     employee: Employee;
@@ -57,6 +58,9 @@ export default function Staff({ employeesWithItems }: StaffPageProps) {
     useMainTitle("Staff Management");
     return (
         <>
+            <Head>
+                <title>Staff - Project 3</title>
+            </Head>
             <Grid container spacing={3}>
                 {employeesWithItems.map((employeeWithItems) => (
                     <Grid item xs={12} md={6} lg={4} key={employeeWithItems.employee.id}>

@@ -21,12 +21,12 @@ type PairingFormProps = {
 };
 
 export function PairingForm({ itemRecord }: PairingFormProps) {
-    const { epc, firstName: fname, lastName: lname, itemName: iname } = itemRecord;
+    const { epc, firstName: fname, lastName: lname, itemName: iname, mandatory } = itemRecord;
 
     const [firstName, setFirstName] = useState(fname ?? "");
     const [lastName, setLastName] = useState(lname ?? "");
     const [itemName, setItemName] = useState(iname ?? "");
-    const [mandatoryChecked, setMandatoryChecked] = useState(true);
+    const [mandatoryChecked, setMandatoryChecked] = useState(mandatory ?? true);
 
     const [sentStatus, setSentStatus] = useState<"Unsent" | "Sent" | "Error">("Unsent");
 
