@@ -8,6 +8,7 @@ import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
+import CircularProgress from "@mui/material/CircularProgress";
 // Custom Components
 import { PairingForm } from "../components/PairingForm";
 import { TransitionAlerts } from "../components/TransitionAlert";
@@ -16,6 +17,8 @@ import { SetTitle } from "../components/SetTitle";
 import type { FindEpcReqData, FindEpcResData } from "../types/api/findEpc";
 import type { ItemRecord } from "../types/itemRecord";
 import type { IClientOptions } from "mqtt";
+import { Box } from "@mui/material";
+import { CenteredCircularProgress } from "../components/CenteredCircularProgress";
 
 /* Mr Michaux's MQTT */
 const mqttDomain = process.env.NEXT_PUBLIC_MICHAUX_MQTT;
@@ -38,7 +41,7 @@ export default function Mqtt() {
         setEspLastContact(Date.now());
         if (topic === RECEIVE_EPC_TOPIC) {
             const splitEpc = message.toString().split(";");
-            const validEpcs = splitEpc.filter(validateEpc);
+            const validEpcs = splitEpc.filter((epc) => epc.length === 24); // An EPC is 24 characters long
             const { message: status, itemRecords } = await fetch("/api/findEpc", {
                 method: "POST",
                 headers: {
@@ -65,9 +68,9 @@ export default function Mqtt() {
         connectOptions,
         subscribeTo: [RECEIVE_EPC_TOPIC, ALIVE_TOPIC],
         callbacks: {
-            onComponentMount: () => setMqttConnected(false),
             onConnect: () => setMqttConnected(true),
             onError: () => setMqttConnected(false),
+            onDisconnect: () => setMqttConnected(false),
             onMessage: onMessageCallback,
         },
     });
@@ -75,6 +78,7 @@ export default function Mqtt() {
     return (
         <>
             <SetTitle mainTitle="Pair RFID Tags" />
+
             <Grid container sx={{ justifyContent: "space-between" }}>
                 <Typography variant="h3" component="h2">
                     Pair tags
@@ -92,6 +96,15 @@ export default function Mqtt() {
                     Move away all unnecessary tags and click the RESET button.`}
                 </TransitionAlerts>
             )}
+
+            {useTime() - espLastContact < 16000 && mqttConnected && receivedItemRecords.length === 0 && (
+                <CenteredCircularProgress text={`ESP32 is scanning...`} />
+            )}
+
+            {useTime() - espLastContact >= 16000 && mqttConnected && receivedItemRecords.length === 0 && (
+                <CenteredCircularProgress text={`Waiting for ESP32...`} />
+            )}
+
             {receivedItemRecords.map((itemRecord) => (
                 <Paper
                     key={itemRecord.epc}
@@ -109,8 +122,4 @@ export default function Mqtt() {
     function resetRFID() {
         setReceivedItemRecords([]);
     }
-}
-
-function validateEpc(epc: string) {
-    return epc.length === 24;
 }
