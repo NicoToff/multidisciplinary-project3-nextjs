@@ -1,11 +1,9 @@
 import { useEffect } from "react";
 
-export function SetTitle({ mainTitle }: { mainTitle: string }) {
+export function useMainTitle(title: string) {
     useEffect(() => {
         const mainTitleElement = document.getElementById("main-title");
-        mainTitleElement!.innerText = mainTitle;
+        mainTitleElement!.innerText = title;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    return null;
 }

@@ -1,5 +1,5 @@
 import { prisma } from "../prisma/prisma-client";
-import { SetTitle } from "../components/SetTitle";
+import { useMainTitle } from "../hooks/useMainTitle";
 import { GetServerSideProps } from "next";
 import { Employee, Item } from "@prisma/client";
 
@@ -54,9 +54,9 @@ export const getServerSideProps: GetServerSideProps = async () => {
 type StaffPageProps = { employeesWithItems: EmployeeWithItems[] };
 
 export default function Staff({ employeesWithItems }: StaffPageProps) {
+    useMainTitle("Staff Management");
     return (
         <>
-            <SetTitle mainTitle="Staff Management" />
             <Grid container spacing={3}>
                 {employeesWithItems.map((employeeWithItems) => (
                     <Grid item xs={12} md={6} lg={4} key={employeeWithItems.employee.id}>
@@ -98,7 +98,6 @@ export default function Staff({ employeesWithItems }: StaffPageProps) {
                                     </ListItem>
                                 ))}
                             </List>
-                            {/* TODO: Improve this with : https://mui.com/material-ui/react-list/#interactive */}
                             {employeeWithItems.items.length === 0 && (
                                 <Button
                                     variant="outlined"

@@ -2,23 +2,21 @@ import { useState } from "react";
 // Custom Hooks
 import { useTime } from "../hooks/useTime";
 import { useMqtt } from "../hooks/useMqtt";
+import { useMainTitle } from "../hooks/useMainTitle";
 // MUI Components
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
-import CircularProgress from "@mui/material/CircularProgress";
 // Custom Components
 import { PairingForm } from "../components/PairingForm";
 import { TransitionAlerts } from "../components/TransitionAlert";
-import { SetTitle } from "../components/SetTitle";
+import { CenteredCircularProgress } from "../components/CenteredCircularProgress";
 // Types
 import type { FindEpcReqData, FindEpcResData } from "../types/api/findEpc";
 import type { ItemRecord } from "../types/itemRecord";
 import type { IClientOptions } from "mqtt";
-import { Box } from "@mui/material";
-import { CenteredCircularProgress } from "../components/CenteredCircularProgress";
 
 /* Mr Michaux's MQTT */
 const mqttDomain = process.env.NEXT_PUBLIC_MICHAUX_MQTT;
@@ -75,10 +73,10 @@ export default function Mqtt() {
         },
     });
 
+    useMainTitle("Pair RFID Tags");
+
     return (
         <>
-            <SetTitle mainTitle="Pair RFID Tags" />
-
             <Grid container sx={{ justifyContent: "space-between" }}>
                 <Typography variant="h3" component="h2">
                     Pair tags

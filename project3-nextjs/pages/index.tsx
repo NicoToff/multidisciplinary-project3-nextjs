@@ -1,9 +1,9 @@
 import { useEffect } from "react";
+import { useMainTitle } from "../hooks/useMainTitle";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Deposits from "../components/Deposits";
 import Orders from "../components/Orders";
-import { SetTitle } from "../components/SetTitle";
 
 export default function Index() {
     useEffect(() => {
@@ -11,9 +11,10 @@ export default function Index() {
         mainTitle!.innerText = "Dashboard";
     }, []);
 
+    useMainTitle("Dashboard");
+
     return (
         <>
-            <SetTitle mainTitle="Dashboard" />
             <Grid container spacing={3}>
                 {/* Recent Deposits */}
                 <Grid item xs={12} md={4} lg={3}>
