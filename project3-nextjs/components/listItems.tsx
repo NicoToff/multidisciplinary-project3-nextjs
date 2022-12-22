@@ -5,6 +5,7 @@ import ListItemText from "@mui/material/ListItemText";
 import HomeIcon from "@mui/icons-material/Home";
 import PairRfidTag from "@mui/icons-material/RssFeed";
 import PeopleIcon from "@mui/icons-material/PeopleAlt";
+import EmergencyIcon from "@mui/icons-material/NotificationImportant";
 
 export const mainListItems = (
     <>
@@ -32,13 +33,15 @@ export const mainListItems = (
                 <ListItemText primary="Staff management" />
             </ListItemButton>
         </Link>
+        <Link href="/emergency" style={{ textDecoration: "none", color: "inherit" }}>
+            <ListItemButton>
+                <ListItemIcon>
+                    <EmergencyIcon />
+                </ListItemIcon>
+                <ListItemText primary="Emergency" />
+            </ListItemButton>
+        </Link>
         {/*<ListItemButton>
-            <ListItemIcon>
-                <BarChartIcon />
-            </ListItemIcon>
-            <ListItemText primary="Reports" />
-        </ListItemButton>
-        <ListItemButton>
             <ListItemIcon>
                 <LayersIcon />
             </ListItemIcon>

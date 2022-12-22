@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useMainTitle } from "../hooks/useMainTitle";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
@@ -7,11 +6,6 @@ import Orders from "../components/Orders";
 import Head from "next/head";
 
 export default function Index() {
-    useEffect(() => {
-        const mainTitle = document.getElementById("main-title");
-        mainTitle!.innerText = "Dashboard";
-    }, []);
-
     useMainTitle("Dashboard");
 
     return (

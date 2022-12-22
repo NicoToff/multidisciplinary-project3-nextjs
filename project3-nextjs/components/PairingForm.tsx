@@ -15,6 +15,8 @@ import ErrorIcon from "@mui/icons-material/Error";
 
 import type { InsertReqData, InsertResData } from "../types/api/insert";
 import type { ItemRecord } from "../types/itemRecord";
+import type { SubmissionStatus } from "../types/formComponents";
+import SubmitButton from "./SubmitButton";
 
 type PairingFormProps = {
     itemRecord: ItemRecord;
@@ -28,11 +30,10 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
     const [itemName, setItemName] = useState(iname ?? "");
     const [mandatoryChecked, setMandatoryChecked] = useState(isMandatory ?? true);
 
-    const [sentStatus, setSentStatus] = useState<"Unsent" | "Sent" | "Error">("Unsent");
+    const [sentStatus, setSentStatus] = useState<SubmissionStatus>("Unsent");
 
     return (
         <Box
-            key={epc}
             component={"form"}
             onSubmit={sendToBackEnd}
             sx={{
@@ -41,58 +42,22 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
         >
             <FormControl>
                 <InputLabel htmlFor="firstname">First name</InputLabel>
-                <Input
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    id="firstname"
-                    required
-                    aria-describedby="first name field"
-                />
+                <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} id="firstname" required />
             </FormControl>
             <FormControl>
                 <InputLabel htmlFor="lastname">Last name</InputLabel>
-                <Input
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    id="lastname"
-                    required
-                    aria-describedby="last name field"
-                />
+                <Input value={lastName} onChange={(e) => setLastName(e.target.value)} id="lastname" required />
             </FormControl>
             <FormControl>
                 <InputLabel htmlFor="epc">Item name</InputLabel>
-                <Input
-                    value={itemName}
-                    onChange={(e) => setItemName(e.target.value)}
-                    id="itemname"
-                    required
-                    aria-describedby="name of item to updload"
-                />
+                <Input value={itemName} onChange={(e) => setItemName(e.target.value)} id="itemname" required />
                 <FormHelperText id="itemname">{epc}</FormHelperText>
             </FormControl>
             <FormLabel>
                 Mandatory?
-                <Checkbox
-                    checked={mandatoryChecked}
-                    onChange={(e) => setMandatoryChecked(e.target.checked)}
-                    inputProps={{ "aria-label": "controlled" }}
-                />
+                <Checkbox checked={mandatoryChecked} onChange={(e) => setMandatoryChecked(e.target.checked)} />
             </FormLabel>
-            <Button
-                variant="outlined"
-                color={fname || lname || iname ? "warning" : sentStatus === "Error" ? "error" : "success"}
-                type="submit"
-                disabled={sentStatus === "Sent"}
-                endIcon={sentStatus === "Sent" ? <DoneIcon /> : sentStatus === "Unsent" ? <SendIcon /> : <ErrorIcon />}
-            >
-                {sentStatus === "Sent"
-                    ? "Sent"
-                    : fname || lname || iname
-                    ? "Update"
-                    : sentStatus === "Error"
-                    ? "Error"
-                    : "Send"}
-            </Button>
+            <SubmitButton sentState={sentStatus} updateCondition={Boolean(fname || lname || iname)} />
         </Box>
     );
 
