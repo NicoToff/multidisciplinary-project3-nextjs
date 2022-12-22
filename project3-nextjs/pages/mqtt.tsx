@@ -1,6 +1,5 @@
-// #region Imports
 import { useState, useEffect, useRef } from "react";
-import { connect, MqttClient } from "mqtt";
+import { useTime } from "../hooks/useTime";
 
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
@@ -15,36 +14,39 @@ import { TransitionAlerts } from "../components/TransitionAlert";
 import type { FindEpcReqData, FindEpcResData } from "../types/api/findEpc";
 import type { ItemRecord } from "../types/itemRecord";
 
-import { Time } from "../components/Time";
 import { SetTitle } from "../components/SetTitle";
-// #endregion
 
-/* Public MQTT */
-const mqttDomain = "test.mosquitto.org";
-const port = 8081;
-const mqttUri = `mqtt://${mqttDomain}`;
+import { connect } from "mqtt";
+import type { MqttClient } from "mqtt";
+
+/* Mr Michaux's MQTT */
+const mqttDomain = process.env.NEXT_PUBLIC_MICHAUX_MQTT;
+const mqttUri = `ws://${mqttDomain}`;
 const options = {
-    port,
+    username: process.env.NEXT_PUBLIC_MICHAUX_MQTT_USERNAME,
+    password: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PASSWORD,
+    port: Number(process.env.NEXT_PUBLIC_MICHAUX_MQTT_PORT),
     keepalive: 60,
 };
-
-const RECEIVE_EPC_TOPIC = "/helha/nicotoff/esp32/rfid";
-const ALIVE_TOPIC = "/helha/nicotoff/esp32/alive";
+const RECEIVE_EPC_TOPIC = process.env.NEXT_PUBLIC_MICHAUX_MQTT_RECEIVE_EPC_TOPIC as string;
+const ALIVE_TOPIC = process.env.NEXT_PUBLIC_MICHAUX_MQTT_ALIVE_TOPIC as string;
 
 export default function Mqtt() {
     const [receivedItemRecords, setReceivedItemRecords] = useState<ItemRecord[]>([]);
-    const [currentTime, setCurrentTime] = useState(Date.now());
+    // const [currentTime, setCurrentTime] = useState(Date.now());
     const [espLastContact, setEspLastContact] = useState(0);
     const [mqttConnected, setMqttConnected] = useState(false);
 
     const client = useRef<MqttClient>();
 
     useEffect(() => {
-        // const mainTitle = document.getElementById("main-title");
-        // mainTitle!.innerText = "Pair RFID Tags";
+        setMqttConnected(false); // Reset connection status
         client.current = connect(mqttUri, options);
         client.current.on("connect", () => {
             setMqttConnected(true);
+        });
+        client.current.on("error", () => {
+            setMqttConnected(false);
         });
     }, []);
 
@@ -98,7 +100,7 @@ export default function Mqtt() {
                 </Typography>
                 <Stack direction="row" spacing={1}>
                     <Chip label="Mqtt" color={mqttConnected ? "success" : "error"} />
-                    <Chip label="ESP" color={currentTime - espLastContact < 16000 ? "success" : "error"} />
+                    <Chip label="ESP" color={useTime() - espLastContact < 16000 ? "success" : "error"} />
                 </Stack>
             </Grid>
 
@@ -121,7 +123,7 @@ export default function Mqtt() {
                 </Paper>
             ))}
 
-            <Time setTime={setCurrentTime} />
+            {/* <Time setTime={setCurrentTime} /> */}
         </>
     );
 
