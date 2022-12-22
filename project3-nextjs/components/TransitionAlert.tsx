@@ -18,7 +18,7 @@ export function TransitionAlerts({ children, action, color, sx }: TransitionAler
             <Alert
                 severity={color ?? "success"}
                 action={
-                    <Button aria-label="action" color="inherit" size="small" onClick={action}>
+                    <Button variant="outlined" color="inherit" size="small" onClick={action} aria-label="action">
                         RESET
                     </Button>
                 }

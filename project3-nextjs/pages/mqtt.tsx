@@ -1,29 +1,26 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+// Custom Hooks
 import { useTime } from "../hooks/useTime";
-
+import { useMqtt } from "../hooks/useMqtt";
+// MUI Components
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
-
+// Custom Components
 import { PairingForm } from "../components/PairingForm";
-
 import { TransitionAlerts } from "../components/TransitionAlert";
-
+import { SetTitle } from "../components/SetTitle";
+// Types
 import type { FindEpcReqData, FindEpcResData } from "../types/api/findEpc";
 import type { ItemRecord } from "../types/itemRecord";
-
-import { SetTitle } from "../components/SetTitle";
-
-import { connect } from "mqtt";
-import type { MqttClient } from "mqtt";
-import { useMqtt } from "../hooks/useMqtt";
+import type { IClientOptions } from "mqtt";
 
 /* Mr Michaux's MQTT */
 const mqttDomain = process.env.NEXT_PUBLIC_MICHAUX_MQTT;
-const mqttUri = `ws://${mqttDomain}`;
-const options = {
+const brokerUrl = `ws://${mqttDomain}`;
+const connectOptions: IClientOptions = {
     username: process.env.NEXT_PUBLIC_MICHAUX_MQTT_USERNAME,
     password: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PASSWORD,
     port: Number(process.env.NEXT_PUBLIC_MICHAUX_MQTT_PORT),
@@ -34,13 +31,12 @@ const ALIVE_TOPIC = process.env.NEXT_PUBLIC_MICHAUX_MQTT_ALIVE_TOPIC as string;
 
 export default function Mqtt() {
     const [receivedItemRecords, setReceivedItemRecords] = useState<ItemRecord[]>([]);
-    // const [currentTime, setCurrentTime] = useState(Date.now());
     const [espLastContact, setEspLastContact] = useState(0);
     const [mqttConnected, setMqttConnected] = useState(false);
 
     const client = useMqtt({
-        brokerUrl: mqttUri,
-        connectOptions: options,
+        brokerUrl,
+        connectOptions,
         callbacks: {
             onComponentMount: () => setMqttConnected(false),
             onConnect: () => setMqttConnected(true),
@@ -120,8 +116,6 @@ export default function Mqtt() {
                     <PairingForm itemRecord={itemRecord} />
                 </Paper>
             ))}
-
-            {/* <Time setTime={setCurrentTime} /> */}
         </>
     );
 
