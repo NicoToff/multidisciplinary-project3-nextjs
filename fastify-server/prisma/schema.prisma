@@ -8,10 +8,11 @@ datasource db {
 }
 
 model Employee {
-  id        Int    @id @default(autoincrement())
-  firstName String @db.VarChar(50)
-  lastName  String @db.VarChar(50)
-  Item      Item[]
+  id                 Int                  @id @default(autoincrement())
+  firstName          String               @db.VarChar(50)
+  lastName           String               @db.VarChar(50)
+  Item               Item[]
+  ManagerPhoneNumber ManagerPhoneNumber[]
 }
 
 model Item {
@@ -37,4 +38,13 @@ model RfidTag {
 
 model EspContact {
   lastContact DateTime @id @db.DateTime(0)
+}
+
+model ManagerPhoneNumber {
+  number        Int      @id @unique(map: "number_UNIQUE")
+  employeeId    Int
+  sendEmergency Int?     @default(0) @db.TinyInt
+  Employee      Employee @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ManagerPhoneNumber_Employee1")
+
+  @@index([employeeId], map: "fk_ManagerPhoneNumber_Employee1_idx")
 }

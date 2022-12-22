@@ -1,20 +1,15 @@
+import prisma from "../prisma/prisma.js";
+
 export async function validateEntry(epcs) {
-    // Add the epc to the database if it doesn't exist
-    const promises = epcs.map(epc => {
-        return prisma.rfidTag.upsert({
-            where: {
-                epc,
+    /** All RFID tags in the database found from the `epc` string array */
+    const scannedRfidTags = await prisma.rfidTag.findMany({
+        where: {
+            epc: {
+                in: epcs,
             },
-            update: { lastScanned: new Date() },
-            create: {
-                epc,
-            },
-        });
+        },
     });
-
-    const scannedRfidTags = await Promise.all(promises);
-
-    /** All items that contain a tag from `scannedRfidTags` */
+    /** All items that contain a tag included in the `scannedRfidTags` RfidTag[] array */
     const itemsScanned = await prisma.item.findMany({
         where: {
             rfidTagId: {
@@ -23,7 +18,7 @@ export async function validateEntry(epcs) {
         },
     });
 
-    /** All employees whose id appear in `itemsScanned` */
+    /** All employees whose id appear in the `itemsScanned` Item[] array */
     const employees = await prisma.employee.findMany({
         where: {
             id: {
@@ -32,13 +27,13 @@ export async function validateEntry(epcs) {
         },
     });
 
-    // Fetches all items in the database
+    /** All Items in the database (Item[] array) */
     const itemsFromDB = await prisma.item.findMany({});
 
     /**
-     * We create a JS object for each employee and their items.
-     * We determine if they can enter or not by checking if all mandatory items are scanned.
-     * The equivalent Typescript type for this object is:
+     * An array of JS object containing each employee and their items.
+     * We determine if an employee can enter or not by checking if all mandatory their items are scanned.
+     * For reference, the Typescript type for each object in the array is:
         ```
         type EmployeeWithItems = {
             employee: Employee;
@@ -55,12 +50,9 @@ export async function validateEntry(epcs) {
             employee,
             itemsScanned: itemsScanned.filter(item => item.employeeId === employee.id),
             allItems,
-            canEnter: allItems.every(item => {
-                if (item.isMandatory) {
-                    return itemsScanned.find(scannedItem => scannedItem.id === item.id);
-                }
-                return true;
-            }),
+            canEnter: allItems.every(item =>
+                item.isMandatory ? itemsScanned.find(scannedItem => scannedItem.id === item.id) : true
+            ),
         };
     });
 
