@@ -2,6 +2,6 @@ export type ItemRecord = {
     firstName?: string;
     lastName?: string;
     itemName?: string;
-    mandatory?: boolean;
+    isMandatory?: boolean;
     epc: string;
 };

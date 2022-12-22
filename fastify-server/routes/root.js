@@ -7,19 +7,20 @@ const mqtt = connect(`mqtt://${process.env.NEXT_PUBLIC_MICHAUX_MQTT}`, {
     password: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PASSWORD,
     port: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PORT,
 });
-import findEpc from "../utils/findEpc.js";
-
+import { validateEntry } from "../utils/validateEntry.js";
+import { esp32Update } from "../utils/esp32-update.js";
 const RECEIVE_EPC_TOPIC = process.env.RECEIVE_EPC_TOPIC;
+const ALIVE_TOPIC = process.env.ALIVE_TOPIC;
 
 mqtt.on("connect", () => console.log("Fastify is connected to MQTT broker"));
-mqtt.subscribe(RECEIVE_EPC_TOPIC);
+mqtt.subscribe([RECEIVE_EPC_TOPIC, ALIVE_TOPIC]);
 mqtt.on("message", async (topic, message) => {
-    console.log(`(${topic}) ${message}`);
+    esp32Update();
     if (topic === RECEIVE_EPC_TOPIC) {
         const splitEpc = message.toString().split(";");
-        const validEpcs = splitEpc.filter(validateEpc);
-        const itemRecords = await findEpc(validEpcs);
-        // console.log(itemRecords);
+        const validEpcs = splitEpc.filter(epc => epc.length === 24);
+        const employees = await validateEntry(validEpcs);
+        console.log(employees);
     }
 });
 
@@ -29,8 +30,4 @@ export default async function (fastify, opts) {
         console.log(employees);
         return employees;
     });
-}
-
-function validateEpc(epc) {
-    return epc.length === 24;
 }

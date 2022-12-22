@@ -21,12 +21,12 @@ type PairingFormProps = {
 };
 
 export function PairingForm({ itemRecord }: PairingFormProps) {
-    const { epc, firstName: fname, lastName: lname, itemName: iname, mandatory } = itemRecord;
+    const { epc, firstName: fname, lastName: lname, itemName: iname, isMandatory } = itemRecord;
 
     const [firstName, setFirstName] = useState(fname ?? "");
     const [lastName, setLastName] = useState(lname ?? "");
     const [itemName, setItemName] = useState(iname ?? "");
-    const [mandatoryChecked, setMandatoryChecked] = useState(mandatory ?? true);
+    const [mandatoryChecked, setMandatoryChecked] = useState(isMandatory ?? true);
 
     const [sentStatus, setSentStatus] = useState<"Unsent" | "Sent" | "Error">("Unsent");
 
@@ -45,7 +45,6 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     id="firstname"
-                    inputProps={{ pattern: "/^[a-zA-Z0-9 _+-]+$/" }}
                     required
                     aria-describedby="first name field"
                 />
@@ -56,7 +55,6 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     id="lastname"
-                    inputProps={{ pattern: "/^[a-zA-Z0-9 _+-]+$/" }}
                     required
                     aria-describedby="last name field"
                 />
@@ -67,7 +65,6 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value)}
                     id="itemname"
-                    inputProps={{ pattern: "/^[a-zA-Z0-9 _+-]+$/" }}
                     required
                     aria-describedby="name of item to updload"
                 />
@@ -106,7 +103,7 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
             firstName,
             lastName,
             itemName,
-            mandatory: mandatoryChecked ? "1" : "0",
+            isMandatory: mandatoryChecked ? "1" : "0",
         };
         const response = await fetch("/api/insert", {
             method: "POST",

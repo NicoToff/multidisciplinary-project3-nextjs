@@ -4,11 +4,7 @@
     "description": "This project was bootstrapped with Fastify-CLI.",
     "main": "app.js",
     "type": "module",
-    "directories": {
-        "test": "test"
-    },
     "scripts": {
-        "test": "tap \"test/**/*.test.js\"",
         "start": "fastify start -l info app.js",
         "dev": "fastify start -w -p 3001 -l info -P app.js"
     },

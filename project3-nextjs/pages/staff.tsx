@@ -96,7 +96,7 @@ export default function Staff({ employeesWithItems }: StaffPageProps) {
                                         </ListItemAvatar>
                                         <ListItemText
                                             primary={item.name}
-                                            secondary={item.mandatory ? "Mandatory" : null}
+                                            secondary={item.isMandatory ? "Mandatory" : null}
                                             secondaryTypographyProps={{ color: "error" }}
                                         />
                                     </ListItem>

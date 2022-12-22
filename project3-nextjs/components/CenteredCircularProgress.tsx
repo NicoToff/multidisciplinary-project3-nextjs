@@ -6,7 +6,7 @@ export function CenteredCircularProgress({ text = "Loading..." }: { text?: strin
             <Typography variant="h5" component="h3">
                 {text}
             </Typography>
-            <CircularProgress size={120} sx={{ m: 2 }} />
+            <CircularProgress size={120} color="inherit" sx={{ m: 2 }} />
         </Box>
     );
 }

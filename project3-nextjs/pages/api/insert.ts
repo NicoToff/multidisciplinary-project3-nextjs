@@ -5,8 +5,8 @@ import type { InsertReqData, InsertResData } from "../../types/api/insert";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<InsertResData>) {
     const { epc, firstName, lastName, itemName } = req.body as InsertReqData;
-    const mandatoryString = validateAndFixMandatory((req.body as InsertReqData).mandatory);
-    const mandatory = parseInt(mandatoryString);
+    const mandatoryString = validateAndFixMandatory((req.body as InsertReqData).isMandatory);
+    const isMandatory = parseInt(mandatoryString);
 
     console.log(`firstName: ${firstName}`);
     console.log(`lastName: ${lastName}`);
@@ -48,8 +48,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     })) as { id: number };
 
     // Create a new item with itemName, or fetch the existing one
-    // TODO: Check if the item is already assigned to another employee
-
     let item = await prisma.item.findFirst({
         where: {
             rfidTagId,
@@ -63,8 +61,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 rfidTagId,
                 name: itemName,
                 employeeId: employee.id,
-                mandatory,
-                timestamp: new Date(),
+                isMandatory,
+                lastModified: new Date(),
             },
         });
     } else {
@@ -77,8 +75,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 rfidTagId,
                 name: itemName,
                 employeeId: employee.id,
-                mandatory,
-                timestamp: new Date(),
+                isMandatory,
+                lastModified: new Date(),
             },
         });
     }
@@ -90,7 +88,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
 function isOk(str: string | null) {
     // This tests for alphanumeric characters, spaces, and the following special characters: _+-
-    return str ? /^[a-zA-Z0-9 _+-]+$/.test(str) : false;
+    return str ? /^[a-zA-Z0-9 _àéèç'Œœ+-]+$/.test(str) : false;
 }
 
 function validateAndFixMandatory(num: string | undefined) {
