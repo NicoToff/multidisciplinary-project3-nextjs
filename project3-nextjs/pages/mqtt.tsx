@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 // Custom Hooks
 import { useTime } from "../hooks/useTime";
 import { useMqtt } from "../hooks/useMqtt";
@@ -34,56 +34,43 @@ export default function Mqtt() {
     const [espLastContact, setEspLastContact] = useState(0);
     const [mqttConnected, setMqttConnected] = useState(false);
 
-    const client = useMqtt({
+    const onMessageCallback = async (topic: string, message: Buffer) => {
+        setEspLastContact(Date.now());
+        if (topic === RECEIVE_EPC_TOPIC) {
+            const splitEpc = message.toString().split(";");
+            const validEpcs = splitEpc.filter(validateEpc);
+            const { message: status, itemRecords } = await fetch("/api/findEpc", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ epc: validEpcs } satisfies FindEpcReqData),
+            })
+                .then((f) => f.json() as Promise<FindEpcResData>)
+                .catch(() => {
+                    return { message: "error", itemRecords: undefined };
+                });
+            if (status === "OK" && itemRecords) {
+                const newRecords = itemRecords.filter(
+                    (itemRecord) =>
+                        !receivedItemRecords.some((receivedItemRecord) => receivedItemRecord.epc === itemRecord.epc)
+                );
+                setReceivedItemRecords((prev) => [...prev, ...newRecords]);
+            }
+        }
+    };
+
+    useMqtt({
         brokerUrl,
         connectOptions,
+        subscribeTo: [RECEIVE_EPC_TOPIC, ALIVE_TOPIC],
         callbacks: {
             onComponentMount: () => setMqttConnected(false),
             onConnect: () => setMqttConnected(true),
             onError: () => setMqttConnected(false),
+            onMessage: onMessageCallback,
         },
     });
-
-    useEffect(() => {
-        if (client) {
-            client.subscribe([RECEIVE_EPC_TOPIC, ALIVE_TOPIC]);
-
-            client.on("message", async (topic, message) => {
-                setEspLastContact(Date.now());
-                if (topic === RECEIVE_EPC_TOPIC) {
-                    const splitEpc = message.toString().split(";");
-                    const validEpcs = splitEpc.filter(validateEpc);
-                    const { message: status, itemRecords } = await fetch("/api/findEpc", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ epc: validEpcs } satisfies FindEpcReqData),
-                    })
-                        .then((f) => f.json() as Promise<FindEpcResData>)
-                        .catch(() => {
-                            return { message: "error", itemRecords: undefined };
-                        });
-                    if (status === "OK" && itemRecords) {
-                        const newRecords = itemRecords.filter(
-                            (itemRecord) =>
-                                !receivedItemRecords.some(
-                                    (receivedItemRecord) => receivedItemRecord.epc === itemRecord.epc
-                                )
-                        );
-                        setReceivedItemRecords((prev) => [...prev, ...newRecords]);
-                    }
-                }
-            });
-        }
-
-        return () => {
-            if (client) {
-                client.removeAllListeners();
-                client.unsubscribe(RECEIVE_EPC_TOPIC);
-            }
-        };
-    }, [client, receivedItemRecords]);
 
     return (
         <>
