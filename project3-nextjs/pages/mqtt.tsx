@@ -18,6 +18,7 @@ import { SetTitle } from "../components/SetTitle";
 
 import { connect } from "mqtt";
 import type { MqttClient } from "mqtt";
+import { useMqtt } from "../hooks/useMqtt";
 
 /* Mr Michaux's MQTT */
 const mqttDomain = process.env.NEXT_PUBLIC_MICHAUX_MQTT;
@@ -37,24 +38,21 @@ export default function Mqtt() {
     const [espLastContact, setEspLastContact] = useState(0);
     const [mqttConnected, setMqttConnected] = useState(false);
 
-    const client = useRef<MqttClient>();
+    const client = useMqtt({
+        brokerUrl: mqttUri,
+        connectOptions: options,
+        callbacks: {
+            onComponentMount: () => setMqttConnected(false),
+            onConnect: () => setMqttConnected(true),
+            onError: () => setMqttConnected(false),
+        },
+    });
 
     useEffect(() => {
-        setMqttConnected(false); // Reset connection status
-        client.current = connect(mqttUri, options);
-        client.current.on("connect", () => {
-            setMqttConnected(true);
-        });
-        client.current.on("error", () => {
-            setMqttConnected(false);
-        });
-    }, []);
+        if (client) {
+            client.subscribe([RECEIVE_EPC_TOPIC, ALIVE_TOPIC]);
 
-    useEffect(() => {
-        if (client.current) {
-            client.current.subscribe([RECEIVE_EPC_TOPIC, ALIVE_TOPIC]);
-
-            client.current.on("message", async (topic, message) => {
+            client.on("message", async (topic, message) => {
                 setEspLastContact(Date.now());
                 if (topic === RECEIVE_EPC_TOPIC) {
                     const splitEpc = message.toString().split(";");
@@ -84,9 +82,9 @@ export default function Mqtt() {
         }
 
         return () => {
-            if (client.current) {
-                client.current.removeAllListeners();
-                client.current.unsubscribe(RECEIVE_EPC_TOPIC);
+            if (client) {
+                client.removeAllListeners();
+                client.unsubscribe(RECEIVE_EPC_TOPIC);
             }
         };
     }, [client, receivedItemRecords]);
