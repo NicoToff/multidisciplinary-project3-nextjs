@@ -41,7 +41,7 @@ model EspContact {
 }
 
 model ManagerPhoneNumber {
-  number        Int      @id @unique(map: "number_UNIQUE")
+  number        String   @id @unique(map: "number_UNIQUE") @db.VarChar(20)
   employeeId    Int
   sendEmergency Int?     @default(0) @db.TinyInt
   Employee      Employee @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ManagerPhoneNumber_Employee1")

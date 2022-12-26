@@ -5,18 +5,13 @@ import Input from "@mui/material/Input";
 import InputLabel from "@mui/material/InputLabel";
 import FormHelperText from "@mui/material/FormHelperText";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import FormLabel from "@mui/material/FormLabel";
 import Checkbox from "@mui/material/Checkbox";
-
-import SendIcon from "@mui/icons-material/Send";
-import DoneIcon from "@mui/icons-material/Done";
-import ErrorIcon from "@mui/icons-material/Error";
 
 import type { InsertReqData, InsertResData } from "../types/api/insert";
 import type { ItemRecord } from "../types/itemRecord";
 import type { SubmissionStatus } from "../types/formComponents";
-import SubmitButton from "./SubmitButton";
+import { SubmitButton } from "./SubmitButton";
 
 type PairingFormProps = {
     itemRecord: ItemRecord;
@@ -49,12 +44,12 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
                 <Input value={lastName} onChange={(e) => setLastName(e.target.value)} id="lastname" required />
             </FormControl>
             <FormControl>
-                <InputLabel htmlFor="epc">Item name</InputLabel>
+                <InputLabel htmlFor="itemname">Item name</InputLabel>
                 <Input value={itemName} onChange={(e) => setItemName(e.target.value)} id="itemname" required />
-                <FormHelperText id="itemname">{epc}</FormHelperText>
+                <FormHelperText>{epc}</FormHelperText>
             </FormControl>
             <FormLabel>
-                Mandatory?
+                {`Mandatory?`}
                 <Checkbox checked={mandatoryChecked} onChange={(e) => setMandatoryChecked(e.target.checked)} />
             </FormLabel>
             <SubmitButton sentState={sentStatus} updateCondition={Boolean(fname || lname || iname)} />
@@ -63,6 +58,7 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
 
     async function sendToBackEnd(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        setSentStatus("Sending");
         const body: InsertReqData = {
             epc,
             firstName,
@@ -79,7 +75,7 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
         })
             .then((res) => res.json() as Promise<InsertResData>)
             .catch(() => ({ message: "Error" } as InsertResData));
-        if (response.message !== "Error" && response.message !== "Bad Request") {
+        if (response.message === "OK") {
             setSentStatus("Sent");
         } else {
             setSentStatus("Error");

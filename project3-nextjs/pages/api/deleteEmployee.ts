@@ -12,6 +12,12 @@ export default async function deleteEmployee(req: NextApiRequest, res: NextApiRe
             return;
         }
 
+        const managerPhoneNumber = await prisma.managerPhoneNumber.deleteMany({
+            where: {
+                employeeId: Number(employeeId),
+            },
+        });
+
         const deletedEmployee = await prisma.employee.delete({
             where: {
                 id: Number(employeeId),

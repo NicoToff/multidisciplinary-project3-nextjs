@@ -1,1 +1,1 @@
-export type SubmissionStatus = "Unsent" | "Sent" | "Error";
+export type SubmissionStatus = "Unsent" | "Sending" | "Sent" | "Error";

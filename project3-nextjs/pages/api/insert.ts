@@ -8,11 +8,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const mandatoryString = validateAndFixMandatory((req.body as InsertReqData).isMandatory);
     const isMandatory = parseInt(mandatoryString);
 
-    console.log(`firstName: ${firstName}`);
-    console.log(`lastName: ${lastName}`);
-    console.log(`itemName: ${itemName}`);
-    console.log(`epc: ${epc}`);
-
     if (!(isOk(firstName) && isOk(lastName) && isOk(itemName) && isOk(epc))) {
         res.status(400).json({ message: "Bad Request" });
         return;
