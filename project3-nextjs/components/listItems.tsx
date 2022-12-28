@@ -14,7 +14,7 @@ export const mainListItems = (
                 <ListItemIcon>
                     <HomeIcon />
                 </ListItemIcon>
-                <ListItemText primary="Home" />
+                <ListItemText primary="Dashboard" />
             </ListItemButton>
         </Link>
         <Link href="/mqtt" style={{ textDecoration: "none", color: "inherit" }}>
