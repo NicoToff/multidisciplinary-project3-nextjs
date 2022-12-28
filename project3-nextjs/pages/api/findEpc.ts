@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma, prismaPing } from "../../prisma/prisma-client";
-import { Employee, Item, RfidTag } from "@prisma/client";
+import { RfidTag } from "@prisma/client";
 
 import type { FindEpcReqData, FindEpcResData } from "../../types/api/findEpc";
 import type { ItemRecord } from "../../types/itemRecord";

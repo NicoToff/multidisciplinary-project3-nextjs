@@ -1,5 +1,5 @@
 import { useMainTitle } from "../hooks/useMainTitle";
-import { prisma } from "../prisma/prisma-client";
+import { prisma, prismaPing } from "../prisma/prisma-client";
 import { EmergencyForm } from "../components/EmergencyForm";
 import Paper from "@mui/material/Paper";
 import Head from "next/head";
@@ -8,6 +8,19 @@ import type { EmployeeWithPhoneNumber } from "../types/employeeWithPhoneNumber";
 import type { InsertEmergencyReqData, InsertEmergencyResData } from "../types/api/insertEmergency";
 
 export const getServerSideProps: GetServerSideProps = async () => {
+    // #region Check if DB is reachable
+    try {
+        await prismaPing();
+    } catch (error) {
+        console.error(error);
+        return {
+            props: {
+                employeesWithPhoneNumbers: [],
+            } satisfies EmergencyProps,
+        };
+    }
+    // #endregion
+
     const employees = await prisma.employee.findMany();
     const phoneNumbers = await prisma.managerPhoneNumber.findMany({
         where: {
@@ -26,7 +39,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
     return {
         props: {
             employeesWithPhoneNumbers: JSON.parse(JSON.stringify(employeesWithPhoneNumbers)), // Makes it serializable (removes Array methods)
-        },
+        } satisfies EmergencyProps,
     };
 };
 

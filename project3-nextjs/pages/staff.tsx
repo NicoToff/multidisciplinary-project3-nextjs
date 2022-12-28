@@ -1,4 +1,4 @@
-import { prisma } from "../prisma/prisma-client";
+import { prisma, prismaPing } from "../prisma/prisma-client";
 import { useMainTitle } from "../hooks/useMainTitle";
 import { GetServerSideProps } from "next";
 import { Employee, Item } from "@prisma/client";
@@ -25,6 +25,19 @@ type EmployeeWithItems = {
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
+    // #region Check if DB is reachable
+    try {
+        await prismaPing();
+    } catch (error) {
+        console.error(error);
+        return {
+            props: {
+                employeesWithItems: [],
+            } satisfies StaffPageProps,
+        };
+    }
+    // #endregion
+
     const employees: Employee[] = await prisma.employee.findMany({});
     const items: Item[] = await prisma.item.findMany({});
 
@@ -48,8 +61,8 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
     return {
         props: {
-            employeesWithItems: JSON.parse(JSON.stringify(employeesWithItems)), // Makes it serializable (removes Array methods)
-        },
+            employeesWithItems: JSON.parse(JSON.stringify(employeesWithItems)), // This makes it serializable (removes Array methods)
+        } satisfies StaffPageProps,
     };
 };
 

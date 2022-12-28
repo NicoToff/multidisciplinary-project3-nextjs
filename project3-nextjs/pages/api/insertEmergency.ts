@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma, prismaPing } from "../../prisma/prisma-client";
 import type { InsertEmergencyReqData, InsertEmergencyResData } from "../../types/api/insertEmergency";
