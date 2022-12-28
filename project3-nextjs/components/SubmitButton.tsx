@@ -12,53 +12,55 @@ type SubmitButtonProps = {
 };
 
 export function SubmitButton({ sentState, updateCondition }: SubmitButtonProps) {
+    const { color, endIcon, label } = getButtonProps(sentState, updateCondition);
     return (
         <Button
             variant="outlined"
-            color={getButtonColor()}
+            color={color}
             type="submit"
             disabled={sentState === "Sent" || sentState === "Sending"}
-            endIcon={getButtonEndIcon()}
+            endIcon={endIcon}
         >
-            {getButtonLabel()}
+            {label}
         </Button>
     );
 
-    function getButtonColor() {
-        if (sentState === "Sent") {
-            return "primary";
-        } else if (sentState === "Error") {
-            return "error";
+    type GetButtonPropsReturnType = {
+        color: "primary" | "error" | "warning" | "success";
+        endIcon: JSX.Element;
+        label: string;
+    };
+    function getButtonProps(sendState: SubmissionStatus, updateCondition: boolean): GetButtonPropsReturnType {
+        if (sendState === "Sent") {
+            return {
+                color: "primary",
+                endIcon: <DoneIcon />,
+                label: "Sent",
+            };
+        } else if (sendState === "Error") {
+            return {
+                color: "error",
+                endIcon: <ErrorIcon />,
+                label: "Error",
+            };
+        } else if (sendState === "Sending") {
+            return {
+                color: "warning",
+                endIcon: <>...</>,
+                label: "Sending",
+            };
         } else if (updateCondition) {
-            return "warning";
+            return {
+                color: "warning",
+                endIcon: <SendIcon />,
+                label: "Update",
+            };
         } else {
-            return "success";
-        }
-    }
-
-    function getButtonEndIcon() {
-        if (sentState === "Sent") {
-            return <DoneIcon />;
-        } else if (sentState === "Error") {
-            return <ErrorIcon />;
-        } else if (sentState === "Sending") {
-            return <>...</>;
-        } else {
-            return <SendIcon />;
-        }
-    }
-
-    function getButtonLabel() {
-        if (sentState === "Sent") {
-            return "Sent";
-        } else if (sentState === "Error") {
-            return "Error";
-        } else if (sentState === "Sending") {
-            return "Sending";
-        } else if (updateCondition) {
-            return "Update";
-        } else {
-            return "Send";
+            return {
+                color: "success",
+                endIcon: <SendIcon />,
+                label: "Send",
+            };
         }
     }
 }
