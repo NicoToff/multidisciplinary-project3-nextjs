@@ -24,6 +24,7 @@ type EmployeeWithItems = {
     items: Item[];
 };
 
+// On page load, get all employees and their items from the database (this is an example of server-side rendering)
 export const getServerSideProps: GetServerSideProps = async () => {
     // #region Check if DB is reachable
     try {
@@ -49,6 +50,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
         };
     });
 
+    // Sorting employees by last name
     employeesWithItems.sort((a, b) => {
         if (a.employee.lastName > b.employee.lastName) {
             return 1;

@@ -55,7 +55,7 @@ export default async function findEpc(req: NextApiRequest, res: NextApiResponse<
             },
         },
     });
-
+    /** All items with their related employee */
     const itemsWithInfo: ItemRecord[] = itemsScanned.map((item) => {
         const relatedEmployee = employees.find((employee) => employee.id === item.employeeId);
         return {
@@ -66,7 +66,7 @@ export default async function findEpc(req: NextApiRequest, res: NextApiResponse<
             lastName: relatedEmployee?.lastName || "Unknown",
         };
     });
-
+    /** All the item records from `itemsWithInfo` + all blank epcs that are left */
     const completeItemRecords: ItemRecord[] = [
         ...itemsWithInfo,
         ...scannedRfidTags

@@ -18,12 +18,18 @@ type PairingFormProps = {
 };
 
 export function PairingForm({ itemRecord }: PairingFormProps) {
-    const { epc, firstName: fname, lastName: lname, itemName: iname, isMandatory } = itemRecord;
+    const {
+        epc,
+        firstName: existingFirstname,
+        lastName: existingLastName,
+        itemName: existingItemName,
+        isMandatory: existingMandatoryState,
+    } = itemRecord;
 
-    const [firstName, setFirstName] = useState(fname ?? "");
-    const [lastName, setLastName] = useState(lname ?? "");
-    const [itemName, setItemName] = useState(iname ?? "");
-    const [mandatoryChecked, setMandatoryChecked] = useState(isMandatory ?? true);
+    const [firstName, setFirstName] = useState(existingFirstname ?? "");
+    const [lastName, setLastName] = useState(existingLastName ?? "");
+    const [itemName, setItemName] = useState(existingItemName ?? "");
+    const [mandatoryChecked, setMandatoryChecked] = useState(existingMandatoryState ?? true);
 
     const [sentStatus, setSentStatus] = useState<SubmissionStatus>("Unsent");
 
@@ -52,7 +58,10 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
                 {`Mandatory?`}
                 <Checkbox checked={mandatoryChecked} onChange={(e) => setMandatoryChecked(e.target.checked)} />
             </FormLabel>
-            <SubmitButton sentState={sentStatus} updateCondition={Boolean(fname || lname || iname)} />
+            <SubmitButton
+                sentState={sentStatus}
+                updateCondition={Boolean(existingFirstname || existingLastName || existingItemName)}
+            />
         </Box>
     );
 

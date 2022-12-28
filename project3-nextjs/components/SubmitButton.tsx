@@ -24,43 +24,43 @@ export function SubmitButton({ sentState, updateCondition }: SubmitButtonProps) 
             {label}
         </Button>
     );
+}
 
-    type GetButtonPropsReturnType = {
-        color: "primary" | "error" | "warning" | "success";
-        endIcon: JSX.Element;
-        label: string;
-    };
-    function getButtonProps(sendState: SubmissionStatus, updateCondition: boolean): GetButtonPropsReturnType {
-        if (sendState === "Sent") {
-            return {
-                color: "primary",
-                endIcon: <DoneIcon />,
-                label: "Sent",
-            };
-        } else if (sendState === "Error") {
-            return {
-                color: "error",
-                endIcon: <ErrorIcon />,
-                label: "Error",
-            };
-        } else if (sendState === "Sending") {
-            return {
-                color: "warning",
-                endIcon: <>...</>,
-                label: "Sending",
-            };
-        } else if (updateCondition) {
-            return {
-                color: "warning",
-                endIcon: <SendIcon />,
-                label: "Update",
-            };
-        } else {
-            return {
-                color: "success",
-                endIcon: <SendIcon />,
-                label: "Send",
-            };
-        }
+type GetButtonPropsReturnType = {
+    color: "primary" | "error" | "warning" | "success";
+    endIcon: JSX.Element;
+    label: string;
+};
+function getButtonProps(sendState: SubmissionStatus, updateCondition: boolean): GetButtonPropsReturnType {
+    if (sendState === "Sent") {
+        return {
+            color: "primary",
+            endIcon: <DoneIcon />,
+            label: "Sent",
+        };
+    } else if (sendState === "Error") {
+        return {
+            color: "error",
+            endIcon: <ErrorIcon />,
+            label: "Error",
+        };
+    } else if (sendState === "Sending") {
+        return {
+            color: "warning",
+            endIcon: <>...</>,
+            label: "Sending",
+        };
+    } else if (updateCondition) {
+        return {
+            color: "warning",
+            endIcon: <SendIcon />,
+            label: "Update",
+        };
+    } else {
+        return {
+            color: "success",
+            endIcon: <SendIcon />,
+            label: "Send",
+        };
     }
 }

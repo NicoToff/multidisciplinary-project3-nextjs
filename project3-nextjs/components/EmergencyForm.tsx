@@ -77,6 +77,7 @@ export function EmergencyForm({ employeeWithPhoneNumber }: EmergencyFormProps) {
                 setSentStatus("Error");
                 return { message: "Error" } as InsertEmergencyResData;
             });
+
         if (res.message === "OK") {
             setSentStatus("Sent");
         } else {

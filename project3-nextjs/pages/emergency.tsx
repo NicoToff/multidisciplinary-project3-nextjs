@@ -5,8 +5,8 @@ import Paper from "@mui/material/Paper";
 import Head from "next/head";
 import type { GetServerSideProps } from "next";
 import type { EmployeeWithPhoneNumber } from "../types/employeeWithPhoneNumber";
-import type { InsertEmergencyReqData, InsertEmergencyResData } from "../types/api/insertEmergency";
 
+// On page load, get all employees and their phone numbers from the database (this is an example of server-side rendering)
 export const getServerSideProps: GetServerSideProps = async () => {
     // #region Check if DB is reachable
     try {

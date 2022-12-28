@@ -24,8 +24,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     let employee = await prisma.employee.findFirst({
         where: {
-            firstName,
-            lastName,
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
         },
     });
 
@@ -33,8 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         console.log("Creating new employee");
         employee = await prisma.employee.create({
             data: {
-                firstName,
-                lastName,
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
             },
         });
     }
@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         item = await prisma.item.create({
             data: {
                 rfidTagId,
-                name: itemName,
+                name: itemName.trim(),
                 employeeId: employee.id,
                 isMandatory,
                 lastModified: new Date(),
@@ -77,7 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             },
             data: {
                 rfidTagId,
-                name: itemName,
+                name: itemName.trim(),
                 employeeId: employee.id,
                 isMandatory,
                 lastModified: new Date(),
@@ -89,12 +89,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     res.status(200).json({ message: "OK", item, employee });
 }
-
+/** Test the validity of the string based on common characters in French names */
 function isOk(str: string | null) {
-    // This tests for alphanumeric characters, spaces, and the following special characters: _+-
-    return str ? /^[a-zA-Z0-9 _àéèç'Œœ+-]+$/.test(str) : false;
+    return str ? /^[a-zA-Z0-9 _ÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸàâäçéèêëîïôöùûüÿÆŒæœ'+-]+$/.test(str) : false;
 }
-
 function validateAndFixMandatory(num: string | undefined) {
     return num && (num === "0" || num === "1") ? num : "0";
 }

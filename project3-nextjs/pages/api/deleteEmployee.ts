@@ -18,7 +18,8 @@ export default async function deleteEmployee(req: NextApiRequest, res: NextApiRe
         res.status(400).json({ message: "Bad Request" });
         return;
     }
-    // Delete all items that belong to the employee (if any are somehow left)
+
+    // Delete all items that belong to the employee (if any are left, somehow)
     await prisma.item.deleteMany({
         where: {
             employeeId: Number(employeeId),
