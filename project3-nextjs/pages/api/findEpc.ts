@@ -1,12 +1,21 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../prisma/prisma-client";
+import { prisma, prismaPing } from "../../prisma/prisma-client";
 import { Employee, Item, RfidTag } from "@prisma/client";
 
 import type { FindEpcReqData, FindEpcResData } from "../../types/api/findEpc";
 import type { ItemRecord } from "../../types/itemRecord";
 
 export default async function findEpc(req: NextApiRequest, res: NextApiResponse<FindEpcResData>) {
+    // Check if DB is reachable
+    try {
+        await prismaPing();
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+        return;
+    }
+
     const { epc: epcs } = req.body as FindEpcReqData;
 
     if (!epcs) {

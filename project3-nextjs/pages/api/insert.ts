@@ -1,9 +1,18 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../prisma/prisma-client";
+import { prisma, prismaPing } from "../../prisma/prisma-client";
 import type { InsertReqData, InsertResData } from "../../types/api/insert";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<InsertResData>) {
+    // Check if DB is reachable
+    try {
+        await prismaPing();
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+        return;
+    }
+
     const { epc, firstName, lastName, itemName } = req.body as InsertReqData;
     const mandatoryString = validateAndFixMandatory((req.body as InsertReqData).isMandatory);
     const isMandatory = parseInt(mandatoryString);

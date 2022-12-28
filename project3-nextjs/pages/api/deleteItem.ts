@@ -1,8 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../prisma/prisma-client";
+import { prisma, prismaPing } from "../../prisma/prisma-client";
 import type { DeleteItemReqData, DeleteItemResData } from "../../types/api/deleteItem";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<DeleteItemResData>) {
+    // Check if DB is reachable
+    try {
+        await prismaPing();
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+        return;
+    }
+
     const { itemId } = req.body as DeleteItemReqData;
     if (!itemId || isNaN(parseInt(itemId))) {
         res.status(400).json({ message: "Bad Request" });
