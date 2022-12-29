@@ -17,7 +17,7 @@ export const mainListItems = (
                 <ListItemText primary="Dashboard" />
             </ListItemButton>
         </Link>
-        <Link href="/mqtt" style={{ textDecoration: "none", color: "inherit" }}>
+        <Link href="/pair-tags" style={{ textDecoration: "none", color: "inherit" }}>
             <ListItemButton>
                 <ListItemIcon>
                     <PairRfidTag />
@@ -41,37 +41,5 @@ export const mainListItems = (
                 <ListItemText primary="Emergency" />
             </ListItemButton>
         </Link>
-        {/*<ListItemButton>
-            <ListItemIcon>
-                <LayersIcon />
-            </ListItemIcon>
-            <ListItemText primary="Integrations" />
-        </ListItemButton> */}
     </>
 );
-
-// export const secondaryListItems = (
-//     <>
-//         <ListSubheader component="div" inset>
-//             Saved reports
-//         </ListSubheader>
-//         <ListItemButton>
-//             <ListItemIcon>
-//                 <AssignmentIcon />
-//             </ListItemIcon>
-//             <ListItemText primary="Current month" />
-//         </ListItemButton>
-//         <ListItemButton>
-//             <ListItemIcon>
-//                 <AssignmentIcon />
-//             </ListItemIcon>
-//             <ListItemText primary="Last quarter" />
-//         </ListItemButton>
-//         <ListItemButton>
-//             <ListItemIcon>
-//                 <AssignmentIcon />
-//             </ListItemIcon>
-//             <ListItemText primary="Year-end sale" />
-//         </ListItemButton>
-//     </>
-// );

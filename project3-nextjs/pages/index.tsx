@@ -72,7 +72,7 @@ export default function Dashboard() {
                         <title>Dashboard - Project 3</title>
                     </Head>
                     <Grid container spacing={3}>
-                        <Grid item xs={12} md={4} lg={3}>
+                        <Grid item xs={12} md={6} lg={3}>
                             <Card>
                                 <CardHeader
                                     title="Last contact:"
@@ -81,7 +81,7 @@ export default function Dashboard() {
                                 />
                             </Card>
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid item xs={12} lg={6}>
                             <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
                                 <div style={{ height: "44vh", minHeight: 400, width: "100%" }}>
                                     <DataGrid rows={rows} columns={columns} />
