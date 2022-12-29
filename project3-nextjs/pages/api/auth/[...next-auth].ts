@@ -10,6 +10,7 @@ export default NextAuth({
         }),
         // ...add more providers here
     ],
+    secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
         session({ session, token, user }) {
             return session; // The return type will match the one returned in `useSession()`
