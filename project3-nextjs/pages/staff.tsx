@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { prisma, prismaPing } from "../prisma/prisma-client";
 import { useMainTitle } from "../hooks/useMainTitle";
 import { GetServerSideProps } from "next";
@@ -72,6 +73,8 @@ type StaffPageProps = { employeesWithItems: EmployeeWithItems[] };
 
 export default function Staff({ employeesWithItems }: StaffPageProps) {
     useMainTitle("Staff Management");
+    const [isDeleting, setIsDeleting] = useState(false); // Avoids multiple clicks on delete buttons
+
     return (
         <>
             <Head>
@@ -100,6 +103,7 @@ export default function Staff({ employeesWithItems }: StaffPageProps) {
                                                 edge="end"
                                                 onClick={() => deleteItem(item.id)}
                                                 aria-label="delete"
+                                                disabled={isDeleting}
                                             >
                                                 <DeleteIcon />
                                             </IconButton>
@@ -123,21 +127,8 @@ export default function Staff({ employeesWithItems }: StaffPageProps) {
                                     variant="outlined"
                                     sx={{ m: 0.5 }}
                                     color="error"
-                                    onClick={() =>
-                                        fetch("/api/deleteEmployee", {
-                                            method: "POST",
-                                            headers: {
-                                                "Content-Type": "application/json",
-                                            },
-                                            body: JSON.stringify({ employeeId: employeeWithItems.employee.id }),
-                                        })
-                                            .then(() => {
-                                                window.location.reload();
-                                            })
-                                            .catch((err) => {
-                                                console.error(err);
-                                            })
-                                    }
+                                    onClick={() => deleteEmployee(employeeWithItems.employee.id)}
+                                    disabled={isDeleting}
                                 >
                                     Delete Employee
                                 </Button>
@@ -148,20 +139,38 @@ export default function Staff({ employeesWithItems }: StaffPageProps) {
             </Grid>
         </>
     );
-}
 
-function deleteItem(itemId: number) {
-    fetch("/api/deleteItem", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ itemId }),
-    })
-        .then(() => {
-            window.location.reload();
+    function deleteItem(itemId: number) {
+        setIsDeleting(true);
+        fetch("/api/deleteItem", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ itemId }),
         })
-        .catch((err) => {
-            console.error(err);
-        });
+            .then(() => {
+                window.location.reload();
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    }
+
+    function deleteEmployee(employeeId: number) {
+        setIsDeleting(true);
+        fetch("/api/deleteEmployee", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ employeeId }),
+        })
+            .then(() => {
+                window.location.reload();
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    }
 }
