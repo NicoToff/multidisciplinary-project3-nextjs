@@ -7,5 +7,4 @@ export type DeleteItemReqData = {
 
 export type DeleteItemResData = {
     message: HTTP_Message;
-    item?: Item;
 };

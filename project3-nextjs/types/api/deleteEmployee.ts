@@ -7,5 +7,4 @@ export type DeleteEmployeeReqData = {
 
 export type DeleteEmployeeResData = {
     message: HTTP_Message;
-    employee?: Employee;
 };
