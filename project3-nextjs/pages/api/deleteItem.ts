@@ -3,7 +3,7 @@ import { prisma, prismaPing } from "../../prisma/prisma-client";
 import type { DeleteItemReqData, DeleteItemResData } from "../../types/api/deleteItem";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<DeleteItemResData>) {
-    // Check if DB is reachable
+    // #region Check if DB is reachable
     try {
         await prismaPing();
     } catch (error) {
@@ -11,6 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         res.status(500).json({ message: "Internal Server Error" });
         return;
     }
+    // #endregion
 
     const { itemId } = req.body as DeleteItemReqData;
     if (!itemId || isNaN(parseInt(itemId))) {
@@ -18,16 +19,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         return;
     }
 
-    const item = await prisma.item.delete({
-        where: {
-            id: parseInt(itemId),
-        },
-    });
-
-    if (!item) {
+    try {
+        await prisma.item.deleteMany({
+            where: {
+                id: parseInt(itemId),
+            },
+        });
+        res.status(200).json({ message: "OK" });
+    } catch (error) {
+        console.error(error);
         res.status(400).json({ message: "Bad Request" });
-        return;
     }
-
-    res.status(200).json({ message: "OK", item });
 }

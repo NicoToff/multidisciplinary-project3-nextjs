@@ -7,7 +7,7 @@ import type { FindEpcReqData, FindEpcResData } from "../../types/api/findEpc";
 import type { ItemRecord } from "../../types/itemRecord";
 
 export default async function findEpc(req: NextApiRequest, res: NextApiResponse<FindEpcResData>) {
-    // Check if DB is reachable
+    // #region Check if DB is reachable
     try {
         await prismaPing();
     } catch (error) {
@@ -15,6 +15,7 @@ export default async function findEpc(req: NextApiRequest, res: NextApiResponse<
         res.status(500).json({ message: "Internal Server Error" });
         return;
     }
+    // #endregion
 
     const { epc: epcs } = req.body as FindEpcReqData;
 
@@ -36,45 +37,50 @@ export default async function findEpc(req: NextApiRequest, res: NextApiResponse<
         });
     });
 
-    const scannedRfidTags: RfidTag[] = await Promise.all(promises);
+    try {
+        const scannedRfidTags: RfidTag[] = await Promise.all(promises);
 
-    /** All items that contain a tag from `scannedRfidTags` */
-    const itemsScanned = await prisma.item.findMany({
-        where: {
-            rfidTagId: {
-                in: scannedRfidTags.map((tag) => tag.id),
+        /** All items that contain a tag from `scannedRfidTags` */
+        const itemsScanned = await prisma.item.findMany({
+            where: {
+                rfidTagId: {
+                    in: scannedRfidTags.map((tag) => tag.id),
+                },
             },
-        },
-    });
+        });
 
-    /** All employees whose id appear in `itemsScanned` */
-    const employees = await prisma.employee.findMany({
-        where: {
-            id: {
-                in: itemsScanned.map((item) => item.employeeId),
+        /** All employees whose id appear in `itemsScanned` */
+        const employees = await prisma.employee.findMany({
+            where: {
+                id: {
+                    in: itemsScanned.map((item) => item.employeeId),
+                },
             },
-        },
-    });
-    /** All items with their related employee */
-    const itemsWithInfo: ItemRecord[] = itemsScanned.map((item) => {
-        const relatedEmployee = employees.find((employee) => employee.id === item.employeeId);
-        return {
-            epc: scannedRfidTags.find((rfidTag) => rfidTag.id === item.rfidTagId)?.epc || "Unknown",
-            itemName: item.name,
-            isMandatory: Boolean(item.isMandatory),
-            firstName: relatedEmployee?.firstName || "Unknown",
-            lastName: relatedEmployee?.lastName || "Unknown",
-        };
-    });
-    /** All the item records from `itemsWithInfo` + all blank epcs that are left */
-    const completeItemRecords: ItemRecord[] = [
-        ...itemsWithInfo,
-        ...scannedRfidTags
-            .filter((rfidTag) => {
-                return !itemsScanned.find((item) => item.rfidTagId === rfidTag.id);
-            })
-            .map((rfidTag) => ({ epc: rfidTag.epc } satisfies ItemRecord)),
-    ];
+        });
+        /** All items with their related employee */
+        const itemsWithInfo: ItemRecord[] = itemsScanned.map((item) => {
+            const relatedEmployee = employees.find((employee) => employee.id === item.employeeId);
+            return {
+                epc: scannedRfidTags.find((rfidTag) => rfidTag.id === item.rfidTagId)?.epc || "Unknown",
+                itemName: item.name,
+                isMandatory: Boolean(item.isMandatory),
+                firstName: relatedEmployee?.firstName || "Unknown",
+                lastName: relatedEmployee?.lastName || "Unknown",
+            };
+        });
+        /** All the item records from `itemsWithInfo` + all blank epcs that are left */
+        const completeItemRecords: ItemRecord[] = [
+            ...itemsWithInfo,
+            ...scannedRfidTags
+                .filter((rfidTag) => {
+                    return !itemsScanned.find((item) => item.rfidTagId === rfidTag.id);
+                })
+                .map((rfidTag) => ({ epc: rfidTag.epc } satisfies ItemRecord)),
+        ];
 
-    res.status(200).json({ message: "OK", itemRecords: completeItemRecords });
+        res.status(200).json({ message: "OK", itemRecords: completeItemRecords });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
 }

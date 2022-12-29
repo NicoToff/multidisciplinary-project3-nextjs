@@ -4,7 +4,7 @@ import { prisma, prismaPing } from "../../prisma/prisma-client";
 import type { InsertReqData, InsertResData } from "../../types/api/insert";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<InsertResData>) {
-    // Check if DB is reachable
+    // #region Check if DB is reachable
     try {
         await prismaPing();
     } catch (error) {
@@ -12,6 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         res.status(500).json({ message: "Internal Server Error" });
         return;
     }
+    // #endregion
 
     const { epc, firstName, lastName, itemName } = req.body as InsertReqData;
     const mandatoryString = validateAndFixMandatory((req.body as InsertReqData).isMandatory);
@@ -22,73 +23,79 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         return;
     }
 
-    let employee = await prisma.employee.findFirst({
-        where: {
-            firstName: firstName.trim(),
-            lastName: lastName.trim(),
-        },
-    });
-
-    if (!employee) {
-        console.log("Creating new employee");
-        employee = await prisma.employee.create({
-            data: {
+    try {
+        let employee = await prisma.employee.findFirst({
+            where: {
                 firstName: firstName.trim(),
                 lastName: lastName.trim(),
             },
         });
-    }
 
-    console.log(employee);
+        if (!employee) {
+            console.log("Creating new employee");
+            employee = await prisma.employee.create({
+                data: {
+                    firstName: firstName.trim(),
+                    lastName: lastName.trim(),
+                },
+            });
+        }
 
-    // Find the RfidTag id in the database
-    const { id: rfidTagId } = (await prisma.rfidTag.findFirst({
-        where: {
-            epc,
-        },
-        select: {
-            id: true,
-        },
-    })) as { id: number };
+        console.log(employee);
 
-    // Create a new item with itemName, or fetch the existing one
-    let item = await prisma.item.findFirst({
-        where: {
-            rfidTagId,
-        },
-    });
-
-    if (!item) {
-        console.log("Creating new item");
-        item = await prisma.item.create({
-            data: {
-                rfidTagId,
-                name: itemName.trim(),
-                employeeId: employee.id,
-                isMandatory,
-                lastModified: new Date(),
-            },
-        });
-    } else {
-        console.log("Updating existing item");
-        item = await prisma.item.update({
+        // Find the RfidTag id in the database
+        const { id: rfidTagId } = (await prisma.rfidTag.findFirst({
             where: {
-                id: item.id,
+                epc,
             },
-            data: {
+            select: {
+                id: true,
+            },
+        })) as { id: number };
+
+        // Create a new item with itemName, or fetch the existing one
+        let item = await prisma.item.findFirst({
+            where: {
                 rfidTagId,
-                name: itemName.trim(),
-                employeeId: employee.id,
-                isMandatory,
-                lastModified: new Date(),
             },
         });
+
+        if (!item) {
+            console.log("Creating new item");
+            item = await prisma.item.create({
+                data: {
+                    rfidTagId,
+                    name: itemName.trim(),
+                    employeeId: employee.id,
+                    isMandatory,
+                    lastModified: new Date(),
+                },
+            });
+        } else {
+            console.log("Updating existing item");
+            item = await prisma.item.update({
+                where: {
+                    id: item.id,
+                },
+                data: {
+                    rfidTagId,
+                    name: itemName.trim(),
+                    employeeId: employee.id,
+                    isMandatory,
+                    lastModified: new Date(),
+                },
+            });
+        }
+
+        console.log(item);
+
+        res.status(200).json({ message: "OK", item, employee });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
-
-    console.log(item);
-
-    res.status(200).json({ message: "OK", item, employee });
 }
+
 /** Test the validity of the string based on common characters in French names */
 function isOk(str: string | null) {
     return str ? /^[a-zA-Z0-9 _ÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸàâäçéèêëîïôöùûüÿÆŒæœ'+-]+$/.test(str) : false;
