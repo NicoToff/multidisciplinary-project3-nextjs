@@ -1,3 +1,6 @@
-DELETE FROM rfidtag;
-DELETE FROM item;
-DELETE FROM employee;
+DELETE FROM RfidTag;
+DELETE FROM Item;
+DELETE FROM EntranceLog;
+DELETE FROM ManagerPhoneNumber;
+DELETE FROM Employee;
+DELETE FROM EspContact;
