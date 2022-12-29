@@ -5,7 +5,7 @@ type UseMqttArgs = {
     brokerUrl: string;
     connectOptions?: IClientOptions;
     subscribeTo?: string | string[];
-    callbacks: UseMqttCallbacks;
+    callbacks?: UseMqttCallbacks;
 };
 
 type UseMqttCallbacks = {
@@ -18,26 +18,22 @@ type UseMqttCallbacks = {
     onSubscribe?: (err: Error, granted: ISubscriptionGrant[]) => void;
 };
 
-export function useMqtt({ brokerUrl, connectOptions, subscribeTo, callbacks }: UseMqttArgs) {
+export function useMqtt({ brokerUrl, connectOptions, subscribeTo, callbacks = {} }: UseMqttArgs) {
     const client = useRef<MqttClient>();
     const { onComponentMount, onConnect, onError, onReconnect, onDisconnect } = callbacks;
     useEffect(() => {
         onComponentMount && onComponentMount();
         client.current = connect(brokerUrl, connectOptions);
         client.current.on("connect", () => {
-            console.log("Connected to broker");
             onConnect && onConnect();
         });
         client.current.on("error", () => {
-            console.log("Error connecting to broker");
             onError && onError();
         });
         client.current.on("reconnect", () => {
-            console.log("Reconnecting to broker");
             onReconnect && onReconnect();
         });
         client.current.on("disconnect", () => {
-            console.log("Disconnected from broker");
             onDisconnect && onDisconnect();
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps

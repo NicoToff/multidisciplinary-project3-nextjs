@@ -16,21 +16,9 @@ import { CenteredCircularProgress } from "../components/CenteredCircularProgress
 // Types
 import type { FindEpcReqData, FindEpcResData } from "../types/api/findEpc";
 import type { ItemRecord } from "../types/itemRecord";
-import type { IClientOptions } from "mqtt";
 import Head from "next/head";
 
-// #region Mr Michaux's MQTT
-const mqttDomain = process.env.NEXT_PUBLIC_MICHAUX_MQTT;
-const brokerUrl = `ws://${mqttDomain}`;
-const connectOptions: IClientOptions = {
-    username: process.env.NEXT_PUBLIC_MICHAUX_MQTT_USERNAME,
-    password: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PASSWORD,
-    port: Number(process.env.NEXT_PUBLIC_MICHAUX_MQTT_PORT),
-    keepalive: 60,
-};
-const RECEIVE_EPC_TOPIC = process.env.NEXT_PUBLIC_MICHAUX_MQTT_RECEIVE_EPC_TOPIC as string;
-const ALIVE_TOPIC = process.env.NEXT_PUBLIC_MICHAUX_MQTT_ALIVE_TOPIC as string;
-// #endregion
+import { brokerUrl, connectOptions, RECEIVE_EPC_TOPIC, ALIVE_TOPIC } from "../utils/mqtt-variables";
 
 export default function Mqtt() {
     useMainTitle("Pair RFID Tags");
