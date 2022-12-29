@@ -8,9 +8,10 @@ import Head from "next/head";
 import Image from "next/image";
 // MUI Components
 import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
+import Stack from "@mui/material/Stack";
+import Chip from "@mui/material/Chip";
 // MUI Components
 import { DataGrid } from "@mui/x-data-grid";
 // Custom Components
@@ -29,6 +30,7 @@ export default function Dashboard() {
     useMainTitle("Dashboard");
     const [lastEspContact, setLastEspContact] = useState<Date>();
     const [rows, setRows] = useState<EntranceLogValidRow[]>([]);
+    const [mqttConnected, setMqttConnected] = useState(false);
     const [mqttLog, setMqttLog] = useState<JSX.Element[]>([]);
 
     const updateLastEspContact = async () => {
@@ -53,8 +55,9 @@ export default function Dashboard() {
         }
     };
 
-    const onMessageCallback = async (topic: string, message: Buffer) => {
+    const updateMqttLog = async (topic: string, message: Buffer) => {
         if (topic !== RECEIVE_EPC_TOPIC && topic !== ALIVE_TOPIC) {
+            const improvedMessage = message.toString().replace("$$$", " -> ");
             setMqttLog((prev) => [
                 ...prev,
                 <Typography
@@ -63,8 +66,9 @@ export default function Dashboard() {
                         color: topic.includes("invalid") ? "error.main" : "inherit",
                         fontSize: "0.9rem",
                         lineHeight: "1rem",
+                        fontFamily: "monospace",
                     }}
-                >{`<${new Date().toISOString()}> (${topic}) ${message.toString()}`}</Typography>,
+                >{`<${new Date().toISOString()}> (${topic}) ${improvedMessage}`}</Typography>,
             ]);
         }
     };
@@ -74,8 +78,10 @@ export default function Dashboard() {
         connectOptions,
         subscribeTo: ["/toffolon/#"],
         callbacks: {
-            onConnect: () => console.log("Connected to MQTT broker"),
-            onMessage: onMessageCallback,
+            onConnect: () => setMqttConnected(true),
+            onMessage: updateMqttLog,
+            onDisconnect: () => setMqttConnected(false),
+            onError: () => setMqttConnected(false),
         },
     });
 
@@ -87,8 +93,26 @@ export default function Dashboard() {
     });
 
     const columns: GridColDef[] = [
-        { field: "name", headerName: "Last & First name", width: 225 },
-        { field: "timestamp", headerName: "Entrance timestamp", width: 200 },
+        { field: "name", headerName: "Last & First name", flex: 1, minWidth: 175 },
+        {
+            field: "timestamp",
+            headerName: "ISO timestamp",
+            minWidth: 200,
+            flex: 1,
+            renderCell: ({ value }) => (
+                <Stack direction="row" spacing={1}>
+                    <Chip label={value} size="small" />
+                </Stack>
+            ),
+        },
+        {
+            field: "timeAgo",
+            headerName: "Info",
+            minWidth: 150,
+            flex: 1,
+            valueFormatter: ({ value }) => formatTimeAgo(value),
+            sortable: false,
+        },
     ];
 
     return (
@@ -120,7 +144,10 @@ export default function Dashboard() {
                         </Grid>
                         <Grid item xs={12}>
                             <Card sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-                                <CardHeader title="MQTT log" />
+                                <Grid container sx={{ justifyContent: "space-between" }}>
+                                    <CardHeader title="MQTT log" />
+                                    <Chip label="Mqtt" color={mqttConnected ? "success" : "error"} />
+                                </Grid>
                                 {mqttLog}
                             </Card>
                         </Grid>

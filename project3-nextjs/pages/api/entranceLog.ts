@@ -34,7 +34,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 id: entranceLog.id,
                 name: `${employee?.lastName}, ${employee?.firstName}`,
                 timestamp: entranceLog.timestamp,
-            };
+                timeAgo: entranceLog.timestamp,
+            } satisfies EntranceLogValidRow;
         });
 
         res.status(200).json({ message: "OK", generatedRows });
