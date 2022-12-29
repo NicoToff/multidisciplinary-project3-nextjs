@@ -19,6 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         /^(\s|[\/\.-])*(0(\s|[\/\.-])*|\+(\s|[\/\.-])*3(\s|[\/\.-])*2(\s|[\/\.-])*)4(\s|[\/\.-])*\d(\s|[\/\.-])*\d(\s|[\/\.-])*\d(\s|[\/\.-])*\d(\s|[\/\.-])*\d(\s|[\/\.-])*\d(\s|[\/\.-])*\d(\s|[\/\.-])*\d(\s|[\/\.-])*$/;
 
     if (!newPhoneNumber.match(belgianPhoneNumberRegex)) {
+        console.error("Invalid belgian phone number");
         res.status(400).json({ message: "Bad Request" });
         return;
     }
@@ -33,7 +34,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             },
         });
 
-        if (phoneNumberExists) {
+        if (phoneNumberExists && phoneNumberExists.employeeId !== employeeWithPhoneNumber.employee.id) {
+            console.error("Another employee already has this phone number");
             res.status(400).json({ message: "Bad Request" });
             return;
         }
