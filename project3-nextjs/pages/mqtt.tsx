@@ -19,7 +19,7 @@ import type { ItemRecord } from "../types/itemRecord";
 import type { IClientOptions } from "mqtt";
 import Head from "next/head";
 
-/* Mr Michaux's MQTT */
+// #region Mr Michaux's MQTT
 const mqttDomain = process.env.NEXT_PUBLIC_MICHAUX_MQTT;
 const brokerUrl = `ws://${mqttDomain}`;
 const connectOptions: IClientOptions = {
@@ -30,8 +30,11 @@ const connectOptions: IClientOptions = {
 };
 const RECEIVE_EPC_TOPIC = process.env.NEXT_PUBLIC_MICHAUX_MQTT_RECEIVE_EPC_TOPIC as string;
 const ALIVE_TOPIC = process.env.NEXT_PUBLIC_MICHAUX_MQTT_ALIVE_TOPIC as string;
+// #endregion
 
 export default function Mqtt() {
+    useMainTitle("Pair RFID Tags");
+
     const [receivedItemRecords, setReceivedItemRecords] = useState<ItemRecord[]>([]);
     const [espLastContact, setEspLastContact] = useState(0);
     const [mqttConnected, setMqttConnected] = useState(false);
@@ -73,8 +76,6 @@ export default function Mqtt() {
             onMessage: onMessageCallback,
         },
     });
-
-    useMainTitle("Pair RFID Tags");
 
     return (
         <>
