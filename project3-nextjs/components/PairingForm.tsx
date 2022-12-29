@@ -42,15 +42,15 @@ export function PairingForm({ itemRecord }: PairingFormProps) {
             }}
         >
             <FormControl>
-                <InputLabel htmlFor="firstname">First name</InputLabel>
+                <InputLabel htmlFor="firstname">{`First name`}</InputLabel>
                 <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} id="firstname" required />
             </FormControl>
             <FormControl>
-                <InputLabel htmlFor="lastname">Last name</InputLabel>
+                <InputLabel htmlFor="lastname">{`Last name`}</InputLabel>
                 <Input value={lastName} onChange={(e) => setLastName(e.target.value)} id="lastname" required />
             </FormControl>
             <FormControl>
-                <InputLabel htmlFor="itemname">Item name</InputLabel>
+                <InputLabel htmlFor="itemname">{`Item name`}</InputLabel>
                 <Input value={itemName} onChange={(e) => setItemName(e.target.value)} id="itemname" required />
                 <FormHelperText>{epc}</FormHelperText>
             </FormControl>

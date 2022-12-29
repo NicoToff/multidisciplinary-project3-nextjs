@@ -37,15 +37,15 @@ export function EmergencyForm({ employeeWithPhoneNumber }: EmergencyFormProps) {
             }}
         >
             <FormControl>
-                <InputLabel htmlFor="firstname">First name</InputLabel>
+                <InputLabel htmlFor="firstname">{`First name`}</InputLabel>
                 <Input value={firstName} id="firstname" disabled />
             </FormControl>
             <FormControl>
-                <InputLabel htmlFor="lastname">Last name</InputLabel>
+                <InputLabel htmlFor="lastname">{`Last name`}</InputLabel>
                 <Input value={lastName} id="lastname" disabled />
             </FormControl>
             <FormControl>
-                <InputLabel htmlFor="phoneNumber">Phone number</InputLabel>
+                <InputLabel htmlFor="phoneNumber">{`Phone number`}</InputLabel>
                 <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} id="phoneNumber" required />
             </FormControl>
             <FormLabel>

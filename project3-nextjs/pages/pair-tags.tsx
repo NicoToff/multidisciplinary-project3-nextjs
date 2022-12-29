@@ -80,11 +80,11 @@ export default function Mqtt() {
     return (
         <>
             <Head>
-                <title>Pair Tags - Project 3</title>
+                <title>{`Pair Tags - Project 3`}</title>
             </Head>
             <Grid container sx={{ justifyContent: "space-between" }}>
                 <Typography variant="h3" component="h2">
-                    Pair tags
+                    {`Pair tags`}
                 </Typography>
                 <Stack direction="row" spacing={1}>
                     <Chip label="Mqtt" color={mqttConnected ? "success" : "error"} />

@@ -1,4 +1,4 @@
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import Avatar from "@mui/material/Avatar";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
@@ -27,11 +27,11 @@ export function Login({ children }: LoginProps) {
                         <LockOutlinedIcon />
                     </Avatar>
                     <Typography component="h2" variant="h4" m={2}>
-                        Sign in
+                        {`Sign in`}
                     </Typography>
-                    <Typography component="p">You must be signed in to view the page.</Typography>
+                    <Typography component="p">{`You must be signed in to view the page.`}</Typography>
                     <Button onClick={() => signIn()} fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-                        Go to authentication page
+                        {`Go to authentication page`}
                     </Button>
                 </Box>
             </Container>

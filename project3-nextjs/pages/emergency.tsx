@@ -69,7 +69,7 @@ export default function Emergency({ employeesWithPhoneNumbers }: EmergencyProps)
                 {`Set up emergency contacts`}
             </Typography>
             <Typography color="text.secondary" mb={3}>
-                {`Add employees' phone number to the list below to notify them in case of an emergency.
+                {`Add employees' phone numbers to the list below to notify them in case of emergency.
                 Be sure to check the "Send ⚠️ SMS?" checkbox to enable notifications.`}
             </Typography>
 

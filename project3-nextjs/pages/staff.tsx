@@ -78,7 +78,7 @@ export default function Staff({ employeesWithItems }: StaffPageProps) {
     return (
         <>
             <Head>
-                <title>Staff - Project 3</title>
+                <title>{`Staff - Project 3`}</title>
             </Head>
             <Grid container spacing={3}>
                 {employeesWithItems.map((employeeWithItems) => (
@@ -130,7 +130,7 @@ export default function Staff({ employeesWithItems }: StaffPageProps) {
                                     onClick={() => deleteEmployee(employeeWithItems.employee.id)}
                                     disabled={isDeleting}
                                 >
-                                    Delete Employee
+                                    {`Delete Employee`}
                                 </Button>
                             )}
                         </Paper>

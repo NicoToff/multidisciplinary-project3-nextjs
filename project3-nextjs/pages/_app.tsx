@@ -156,7 +156,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
                                         noWrap
                                         sx={{ flexGrow: 1 }}
                                     >
-                                        Dashboard
+                                        {`Dashboard`}
                                     </Typography>
 
                                     <Button
@@ -165,7 +165,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
                                         }}
                                         variant="outlined"
                                     >
-                                        Sign Out
+                                        {`Sign Out`}
                                     </Button>
 
                                     <IconButton size="large" onClick={colorMode.toggleColorMode} color="inherit">

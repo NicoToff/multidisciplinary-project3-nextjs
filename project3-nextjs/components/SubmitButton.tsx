@@ -47,7 +47,7 @@ function getButtonProps(sendState: SubmissionStatus, updateCondition: boolean): 
     } else if (sendState === "Sending") {
         return {
             color: "warning",
-            endIcon: <>...</>,
+            endIcon: <>{`...`}</>,
             label: "Sending",
         };
     } else if (updateCondition) {
