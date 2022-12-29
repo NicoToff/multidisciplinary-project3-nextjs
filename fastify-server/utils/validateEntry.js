@@ -33,7 +33,7 @@ export async function validateEntry(epcs) {
 
     /**
      * An array of JS object containing each employee and their items.
-     * We determine if an employee can enter or not by checking if all mandatory their items are scanned.
+     * We determine if an employee can enter or not by checking if all their mandatory items are scanned.
      * For reference, the Typescript type for each object in the array is:
         ```
         type EmployeeWithItems = {
