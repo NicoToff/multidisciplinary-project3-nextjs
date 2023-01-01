@@ -4,18 +4,38 @@ import { esp32ContactUpdate } from "../utils/esp32-update.js";
 import { connect } from "mqtt";
 import prisma from "../prisma/prisma.js";
 
-const mqtt = connect(`mqtt://${process.env.NEXT_PUBLIC_MICHAUX_MQTT}`, {
-    username: process.env.NEXT_PUBLIC_MICHAUX_MQTT_USERNAME,
-    password: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PASSWORD,
-    port: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PORT,
-});
 const EPC_DISCOVERED_TOPIC = process.env.RECEIVE_EPC_TOPIC;
 const ESP_ALIVE_TOPIC = process.env.ALIVE_TOPIC;
 const VALID_ENTRY_TOPIC = process.env.VALID_ENTRY_TOPIC;
 const INVALID_ENTRY_TOPIC = process.env.INVALID_ENTRY_TOPIC;
 
-const recentValidations = new Map /*<number,Date>*/(); // employeeId, date
-const recentRefusals = new Map /*<number,number>*/(); // employeeId, number of refusals
+const sendAccessResult = async employeeWithItem => {
+    const {
+        employee: { lastName, firstName, id },
+        canEnter,
+    } = employeeWithItem;
+    const validated = await validatedRecently({ employeeId: id });
+    if (validated) {
+        /* If the employee was validated recently, there's nothing more to do */
+        return;
+    }
+    if (canEnter) {
+        mqtt.publish(VALID_ENTRY_TOPIC, `${lastName}, ${firstName}`);
+        // Create a new entrance log in the database
+        await prisma.entranceLog.create({
+            data: {
+                employeeId: id,
+            },
+        });
+    } else {
+        const { itemsScanned, allItems } = employeeWithItem;
+        const missingItems = findMissingItems(itemsScanned, allItems);
+        mqtt.publish(
+            INVALID_ENTRY_TOPIC,
+            `${lastName}, ${firstName}$$$${missingItems.map(item => item.name).join(", ")}`
+        );
+    }
+};
 
 const messageCallback = async (topic, message) => {
     esp32ContactUpdate(); // Update the timestamp of last contact with the ESP32 in the database
@@ -29,64 +49,45 @@ const messageCallback = async (topic, message) => {
         */
         const employeesWithItems = await validateEntry(validEpcs);
 
-        employeesWithItems.forEach(async employeeWithItem => {
-            const {
-                employee: { lastName, firstName, id },
-                canEnter,
-            } = employeeWithItem;
-
-            if (validatedRecently({ employeeId: id })) {
-                /* If the employee was validated recently, there's nothing more to do */
-                return;
-            }
-
-            if (canEnter) {
-                mqtt.publish(VALID_ENTRY_TOPIC, `${lastName}, ${firstName}`);
-                console.log(`${lastName}, ${firstName} has just been validated for entrance`);
-                recentValidations.set(id, new Date());
-                recentRefusals.delete(id);
-                await prisma.entranceLog.create({
-                    data: {
-                        employeeId: id,
-                    },
-                });
-            } else {
-                const numberOfRefusals = recentRefusals.get(id) ?? 0;
-                recentRefusals.set(id, numberOfRefusals + 1);
-                if (numberOfRefusals >= 3) {
-                    const { itemsScanned, allItems } = employeeWithItem;
-                    const missingItems = allItems.filter(item => {
-                        if (item.isMandatory) {
-                            return !itemsScanned.find(scannedItem => scannedItem.id === item.id);
-                        }
-                    });
-                    console.log(
-                        `${lastName}, ${firstName} is missing: ${missingItems.map(item => item.name).join(", ")}`
-                    );
-                    mqtt.publish(
-                        INVALID_ENTRY_TOPIC,
-                        `${lastName}, ${firstName}$$$${missingItems.map(item => item.name).join(", ")}`
-                    );
-                    recentRefusals.delete(id);
-                }
-            }
-        });
+        employeesWithItems.forEach(sendAccessResult);
     }
 };
 
-mqtt.on("connect", () => console.log("Fastify is connected to MQTT broker"));
+const mqtt = connect(`mqtt://${process.env.NEXT_PUBLIC_MICHAUX_MQTT}`, {
+    username: process.env.NEXT_PUBLIC_MICHAUX_MQTT_USERNAME,
+    password: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PASSWORD,
+    port: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PORT,
+});
+mqtt.on("connect", () => console.log("Access Control Checker is connected to the MQTT broker"));
 mqtt.subscribe([EPC_DISCOVERED_TOPIC, ESP_ALIVE_TOPIC]);
 mqtt.on("message", messageCallback);
 
-function validatedRecently({ employeeId, recentValidationsList = recentValidations, retainMinutes = 5 }) {
-    const employeeValidation = recentValidationsList.get(employeeId);
-    if (employeeValidation) {
-        const minutesSinceValidation = (new Date().getTime() - employeeValidation.getTime()) / 1000 / 60;
-        if (minutesSinceValidation <= retainMinutes) {
-            return true;
-        }
+async function validatedRecently({ employeeId, retainMinutes = 5 }) {
+    const latestEntranceLog = await prisma.entranceLog.findFirst({
+        where: {
+            employeeId,
+        },
+        orderBy: {
+            timestamp: "desc",
+        },
+    });
+
+    if (latestEntranceLog) {
+        const { timestamp } = latestEntranceLog;
+        const diff = new Date().getTime() - timestamp.getTime();
+        const minutes = Math.floor(diff / 1000 / 60);
+        return minutes <= retainMinutes;
+    } else {
+        return false;
     }
-    return false;
+}
+
+function findMissingItems(itemsScanned, allItems) {
+    return allItems.filter(item => {
+        if (item.isMandatory) {
+            return !itemsScanned.find(scannedItem => scannedItem.id === item.id);
+        }
+    });
 }
 
 export default async function (fastify, opts) {}
