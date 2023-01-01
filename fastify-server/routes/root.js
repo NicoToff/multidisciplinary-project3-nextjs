@@ -1,6 +1,6 @@
 "use strict";
 import { validateEntry } from "../utils/validateEntry.js";
-import { esp32Update } from "../utils/esp32-update.js";
+import { esp32ContactUpdate } from "../utils/esp32-update.js";
 import { connect } from "mqtt";
 import prisma from "../prisma/prisma.js";
 
@@ -9,31 +9,37 @@ const mqtt = connect(`mqtt://${process.env.NEXT_PUBLIC_MICHAUX_MQTT}`, {
     password: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PASSWORD,
     port: process.env.NEXT_PUBLIC_MICHAUX_MQTT_PORT,
 });
-const RECEIVE_EPC_TOPIC = process.env.RECEIVE_EPC_TOPIC;
-const ALIVE_TOPIC = process.env.ALIVE_TOPIC;
+const EPC_DISCOVERED_TOPIC = process.env.RECEIVE_EPC_TOPIC;
+const ESP_ALIVE_TOPIC = process.env.ALIVE_TOPIC;
 const VALID_ENTRY_TOPIC = process.env.VALID_ENTRY_TOPIC;
 const INVALID_ENTRY_TOPIC = process.env.INVALID_ENTRY_TOPIC;
 
 const recentValidations = new Map /*<number,Date>*/(); // employeeId, date
 const recentRefusals = new Map /*<number,number>*/(); // employeeId, number of refusals
 
-mqtt.on("connect", () => console.log("Fastify is connected to MQTT broker"));
-mqtt.subscribe([RECEIVE_EPC_TOPIC, ALIVE_TOPIC]);
-mqtt.on("message", async (topic, message) => {
-    esp32Update();
-    if (topic === RECEIVE_EPC_TOPIC) {
+const messageCallback = async (topic, message) => {
+    esp32ContactUpdate(); // Update the timestamp of last contact with the ESP32 in the database
+    if (topic === EPC_DISCOVERED_TOPIC) {
         const splitEpc = message.toString().split(";");
         const validEpcs = splitEpc.filter(epc => epc.length === 24);
+
+        /** With the `validateEntry` function determine: 
+           - Which employees are present based on the scanned items
+           - If they can enter or not 
+        */
         const employeesWithItems = await validateEntry(validEpcs);
+
         employeesWithItems.forEach(async employeeWithItem => {
             const {
                 employee: { lastName, firstName, id },
                 canEnter,
             } = employeeWithItem;
+
             if (validatedRecently({ employeeId: id })) {
-                console.log(`${lastName}, ${firstName} has already been validated recently`);
+                /* If the employee was validated recently, there's nothing more to do */
                 return;
             }
+
             if (canEnter) {
                 mqtt.publish(VALID_ENTRY_TOPIC, `${lastName}, ${firstName}`);
                 console.log(`${lastName}, ${firstName} has just been validated for entrance`);
@@ -54,7 +60,9 @@ mqtt.on("message", async (topic, message) => {
                             return !itemsScanned.find(scannedItem => scannedItem.id === item.id);
                         }
                     });
-                    console.log(`${lastName}, ${firstName}$$$${missingItems.map(item => item.name).join(", ")}`);
+                    console.log(
+                        `${lastName}, ${firstName} is missing: ${missingItems.map(item => item.name).join(", ")}`
+                    );
                     mqtt.publish(
                         INVALID_ENTRY_TOPIC,
                         `${lastName}, ${firstName}$$$${missingItems.map(item => item.name).join(", ")}`
@@ -64,14 +72,16 @@ mqtt.on("message", async (topic, message) => {
             }
         });
     }
-});
+};
+
+mqtt.on("connect", () => console.log("Fastify is connected to MQTT broker"));
+mqtt.subscribe([EPC_DISCOVERED_TOPIC, ESP_ALIVE_TOPIC]);
+mqtt.on("message", messageCallback);
 
 function validatedRecently({ employeeId, recentValidationsList = recentValidations, retainMinutes = 5 }) {
     const employeeValidation = recentValidationsList.get(employeeId);
     if (employeeValidation) {
-        const now = new Date();
-        const timeSinceValidation = now.getTime() - employeeValidation.getTime();
-        const minutesSinceValidation = timeSinceValidation / 1000 / 60;
+        const minutesSinceValidation = (new Date().getTime() - employeeValidation.getTime()) / 1000 / 60;
         if (minutesSinceValidation <= retainMinutes) {
             return true;
         }

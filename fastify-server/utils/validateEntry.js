@@ -1,6 +1,41 @@
 "use strict";
 import prisma from "../prisma/prisma.js";
 
+/** This function determines: 
+    - Which employees are present based on the scanned items
+    - If they can enter or not
+    @param {string[]} epcs - An array of RFID tags scanned by the ESP32
+    @returns An array of JS object containing each employee and their items with this shape.
+    For reference, the Typescript type for each object in the array is:
+        ```
+        type EmployeeWithItems = {
+            employee: Employee;
+            itemsScanned: Item[];
+            allItems: Item[];
+            canEnter: boolean;
+        }
+        ```
+    An `Item` is a Prisma model with this shape:
+        ```
+        Item {
+            id          Int      
+            name        String
+            isMandatory Boolean
+            rfidTagId   Int
+            rfidTag     RfidTag  
+            employeeId  Int
+        }
+        ```
+    An `Employee` is a Prisma model with this shape:
+        ```
+        Employee {
+            id        Int      
+            firstName String
+            lastName  String
+            items     Item[]
+        }
+        ```
+*/
 export async function validateEntry(epcs) {
     /** All RFID tags in the database found from the `epc` string array */
     const scannedRfidTags = await prisma.rfidTag.findMany({
@@ -34,19 +69,9 @@ export async function validateEntry(epcs) {
     /**
      * An array of JS object containing each employee and their items.
      * We determine if an employee can enter or not by checking if all their mandatory items are scanned.
-     * For reference, the Typescript type for each object in the array is:
-        ```
-        type EmployeeWithItems = {
-            employee: Employee;
-            itemsScanned: Item[];
-            allItems: Item[];
-            canEnter: boolean;
-        }
-        ```
      */
     const employeesWithItems /* : EmployeeWithItems[] */ = employees.map(employee => {
         const allItems = itemsFromDB.filter(item => item.employeeId === employee.id);
-
         return {
             employee,
             itemsScanned: itemsScanned.filter(item => item.employeeId === employee.id),

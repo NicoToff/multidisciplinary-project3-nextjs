@@ -1,6 +1,6 @@
 import prisma from "../prisma/prisma.js";
 
-export async function esp32Update() {
+export async function esp32ContactUpdate() {
     const esp32 = await prisma.espContact.findMany({});
     if (esp32.length == 0) {
         await prisma.espContact.create({
