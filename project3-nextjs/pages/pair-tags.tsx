@@ -18,7 +18,7 @@ import type { FindEpcReqData, FindEpcResData } from "../types/api/findEpc";
 import type { ItemRecord } from "../types/itemRecord";
 import Head from "next/head";
 
-import { brokerUrl, connectOptions, RECEIVE_EPC_TOPIC, ALIVE_TOPIC } from "../utils/mqtt-variables";
+import { brokerUrl, connectOptions, EPC_DISCOVERED_TOPIC, ESP32_ALIVE_TOPIC } from "../utils/mqtt-variables";
 
 export default function Mqtt() {
     useMainTitle("Pair RFID Tags");
@@ -29,26 +29,24 @@ export default function Mqtt() {
 
     const onMessageCallback = async (topic: string, message: Buffer) => {
         setEspLastContact(Date.now());
-        if (topic === RECEIVE_EPC_TOPIC) {
+        if (topic === EPC_DISCOVERED_TOPIC) {
             const splitEpc = message.toString().split(";");
             const validEpcs = splitEpc.filter((epc) => epc.length === 24); // An EPC is 24 characters long
+            const currentEpcs = receivedItemRecords.map((itemRecord) => itemRecord.epc);
+            const newEpcs = validEpcs.filter((epc) => !currentEpcs.includes(epc));
             const { message: status, itemRecords } = await fetch("/api/findEpc", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ epc: validEpcs } satisfies FindEpcReqData),
+                body: JSON.stringify({ epc: newEpcs } satisfies FindEpcReqData),
             })
                 .then((f) => f.json() as Promise<FindEpcResData>)
                 .catch(() => {
                     return { message: "error", itemRecords: undefined };
                 });
             if (status === "OK" && itemRecords) {
-                const newRecords = itemRecords.filter(
-                    (itemRecord) =>
-                        !receivedItemRecords.some((receivedItemRecord) => receivedItemRecord.epc === itemRecord.epc)
-                );
-                setReceivedItemRecords((prev) => [...prev, ...newRecords]);
+                setReceivedItemRecords((prev) => [...prev, ...itemRecords]);
             }
         }
     };
@@ -56,7 +54,7 @@ export default function Mqtt() {
     useMqtt({
         brokerUrl,
         connectOptions,
-        subscribeTo: [RECEIVE_EPC_TOPIC, ALIVE_TOPIC],
+        subscribeTo: [EPC_DISCOVERED_TOPIC, ESP32_ALIVE_TOPIC],
         callbacks: {
             onConnect: () => setMqttConnected(true),
             onError: () => setMqttConnected(false),

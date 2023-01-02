@@ -23,7 +23,7 @@ import type { EspLastContactResData } from "../types/api/espLastContactDate";
 import type { EntranceLogResData, EntranceLogValidRow } from "../types/api/entranceLog";
 import type { GridColDef } from "@mui/x-data-grid";
 
-import { brokerUrl, connectOptions, RECEIVE_EPC_TOPIC, ALIVE_TOPIC } from "../utils/mqtt-variables";
+import { brokerUrl, connectOptions, EPC_DISCOVERED_TOPIC, ESP32_ALIVE_TOPIC } from "../utils/mqtt-variables";
 import Typography from "@mui/material/Typography";
 
 export default function Dashboard() {
@@ -56,7 +56,7 @@ export default function Dashboard() {
     };
 
     const updateMqttLog = async (topic: string, message: Buffer) => {
-        if (topic !== RECEIVE_EPC_TOPIC && topic !== ALIVE_TOPIC) {
+        if (topic !== EPC_DISCOVERED_TOPIC && topic !== ESP32_ALIVE_TOPIC) {
             const improvedMessage = message.toString().replace("$$$", " -> ");
             setMqttLog((prev) => [
                 ...prev,

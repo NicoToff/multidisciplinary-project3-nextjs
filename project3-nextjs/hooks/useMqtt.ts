@@ -24,18 +24,10 @@ export function useMqtt({ brokerUrl, connectOptions, subscribeTo, callbacks = {}
     useEffect(() => {
         onComponentMount && onComponentMount();
         client.current = connect(brokerUrl, connectOptions);
-        client.current.on("connect", () => {
-            onConnect && onConnect();
-        });
-        client.current.on("error", () => {
-            onError && onError();
-        });
-        client.current.on("reconnect", () => {
-            onReconnect && onReconnect();
-        });
-        client.current.on("disconnect", () => {
-            onDisconnect && onDisconnect();
-        });
+        onConnect && client.current.on("connect", onConnect);
+        onError && client.current.on("error", onError);
+        onReconnect && client.current.on("reconnect", onReconnect);
+        onDisconnect && client.current.on("disconnect", onDisconnect);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -43,19 +35,13 @@ export function useMqtt({ brokerUrl, connectOptions, subscribeTo, callbacks = {}
 
     useEffect(() => {
         if (!client.current) return;
-        if (subscribeTo) {
-            client.current.subscribe(subscribeTo, onSubscribe);
-        }
-        if (onMessage) {
-            client.current.on("message", onMessage);
-        }
+        onMessage && client.current.on("message", onMessage);
+        subscribeTo && client.current.subscribe(subscribeTo, onSubscribe);
         return () => {
             if (subscribeTo) {
                 client.current?.unsubscribe(subscribeTo);
-                client.current?.removeAllListeners();
+                client.current?.removeAllListeners("message");
             }
         };
     }, [onMessage, onSubscribe, subscribeTo]);
-
-    return client.current;
 }

@@ -24,7 +24,7 @@ export default async function findEpc(req: NextApiRequest, res: NextApiResponse<
         return;
     }
 
-    // Add the epc to the database if it doesn't exist
+    // Add the epc to the database if it doesn't exist, otherwise update the lastScanned date
     const promises = epcs.map((epc) => {
         return prisma.rfidTag.upsert({
             where: {
@@ -57,6 +57,7 @@ export default async function findEpc(req: NextApiRequest, res: NextApiResponse<
                 },
             },
         });
+
         /** All items with their related employee */
         const itemsWithInfo: ItemRecord[] = itemsScanned.map((item) => {
             const relatedEmployee = employees.find((employee) => employee.id === item.employeeId);
@@ -68,6 +69,7 @@ export default async function findEpc(req: NextApiRequest, res: NextApiResponse<
                 lastName: relatedEmployee?.lastName || "Unknown",
             };
         });
+
         /** All the item records from `itemsWithInfo` + all blank epcs that are left */
         const completeItemRecords: ItemRecord[] = [
             ...itemsWithInfo,

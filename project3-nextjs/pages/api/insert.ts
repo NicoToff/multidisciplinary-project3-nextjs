@@ -41,8 +41,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             });
         }
 
-        console.log(employee);
-
         // Find the RfidTag id in the database
         const { id: rfidTagId } = (await prisma.rfidTag.findFirst({
             where: {
@@ -61,7 +59,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         });
 
         if (!item) {
-            console.log("Creating new item");
             item = await prisma.item.create({
                 data: {
                     rfidTagId,
@@ -72,7 +69,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 },
             });
         } else {
-            console.log("Updating existing item");
             item = await prisma.item.update({
                 where: {
                     id: item.id,
@@ -86,8 +82,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 },
             });
         }
-
-        console.log(item);
 
         res.status(200).json({ message: "OK", item, employee });
     } catch (error) {
