@@ -22,11 +22,15 @@ const sendAccessResult = async employeeWithItem => {
     if (canEnter) {
         mqtt.publish(VALID_ENTRY_TOPIC, `${lastName}, ${firstName}`);
         // Create a new entrance log in the database
-        await prisma.entranceLog.create({
-            data: {
-                employeeId: id,
-            },
-        });
+        try {
+            await prisma.entranceLog.create({
+                data: {
+                    employeeId: id,
+                },
+            });
+        } catch (error) {
+            console.error(error);
+        }
     } else {
         const { itemsScanned, allItems } = employeeWithItem;
         const missingItems = findMissingItems(itemsScanned, allItems);
@@ -63,21 +67,26 @@ mqtt.subscribe([EPC_DISCOVERED_TOPIC, ESP_ALIVE_TOPIC]);
 mqtt.on("message", messageCallback);
 
 async function validatedRecently({ employeeId, retainMinutes = 5 }) {
-    const latestEntranceLog = await prisma.entranceLog.findFirst({
-        where: {
-            employeeId,
-        },
-        orderBy: {
-            timestamp: "desc",
-        },
-    });
+    try {
+        const latestEntranceLog = await prisma.entranceLog.findFirst({
+            where: {
+                employeeId,
+            },
+            orderBy: {
+                timestamp: "desc",
+            },
+        });
 
-    if (latestEntranceLog) {
-        const { timestamp } = latestEntranceLog;
-        const diff = new Date().getTime() - timestamp.getTime();
-        const minutes = Math.floor(diff / 1000 / 60);
-        return minutes <= retainMinutes;
-    } else {
+        if (latestEntranceLog) {
+            const { timestamp } = latestEntranceLog;
+            const diff = new Date().getTime() - timestamp.getTime();
+            const minutes = Math.floor(diff / 1000 / 60);
+            return minutes <= retainMinutes;
+        } else {
+            return false;
+        }
+    } catch (error) {
+        console.error(error);
         return false;
     }
 }
