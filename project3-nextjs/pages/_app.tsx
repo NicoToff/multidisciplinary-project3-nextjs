@@ -4,7 +4,7 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
 import { createContext, useState, useMemo, useEffect } from "react";
-import { styled, createTheme, ThemeProvider, useTheme } from "@mui/material/styles";
+import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import MuiDrawer from "@mui/material/Drawer";
 import Box from "@mui/material/Box";
@@ -18,7 +18,7 @@ import IconButton from "@mui/material/IconButton";
 import Container from "@mui/material/Container";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import { mainListItems /*, secondaryListItems*/ } from "../components/listItems";
+import { mainListItems } from "../components/listItems";
 import DarkMode from "@mui/icons-material/LightMode";
 import LightMode from "@mui/icons-material/Nightlight";
 

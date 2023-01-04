@@ -43,7 +43,7 @@ const messageCallback = async (topic, message) => {
         const splitEpc = message.toString().split(";");
         const validEpcs = splitEpc.filter(epc => epc.length === 24);
 
-        /** With the `validateEntry` function determine: 
+        /** With the `validateEntry` function, we determine: 
            - Which employees are present based on the scanned items
            - If they can enter or not 
         */
