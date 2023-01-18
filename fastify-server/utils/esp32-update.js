@@ -20,6 +20,6 @@ export async function esp32ContactUpdate() {
             });
         }
     } catch (error) {
-        console.error(error);
+        console.error(error, new Date());
     }
 }

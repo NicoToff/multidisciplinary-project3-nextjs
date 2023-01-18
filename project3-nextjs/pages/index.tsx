@@ -107,7 +107,7 @@ export default function Dashboard() {
         },
         {
             field: "timeAgo",
-            headerName: "Info",
+            headerName: "Relative time",
             minWidth: 150,
             flex: 1,
             valueFormatter: ({ value }) => formatTimeAgo(value),

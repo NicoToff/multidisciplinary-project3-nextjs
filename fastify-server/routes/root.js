@@ -73,7 +73,7 @@ mqtt.on("connect", () => console.log("Access Control Checker is connected to the
 mqtt.subscribe([EPC_DISCOVERED_TOPIC, ESP_ALIVE_TOPIC, EMERGENCY_ANDROID_TOPIC]);
 mqtt.on("message", messageCallback);
 
-async function validatedRecently({ employeeId, retainMinutes = 0 }) {
+async function validatedRecently({ employeeId, retainMinutes = 1 }) {
     try {
         const latestEntranceLog = await prisma.entranceLog.findFirst({
             where: {
